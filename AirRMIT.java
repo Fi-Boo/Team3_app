@@ -169,7 +169,7 @@ public class AirRMIT {
                     System.out.print("Surname: ");
                     surname = sc.nextLine();
 
-                    Matcher matcher = pattern.matcher(firstName);
+                    Matcher matcher = pattern.matcher(surname);
                     matchFound = matcher.find();
 
                     if (matchFound == false) {
