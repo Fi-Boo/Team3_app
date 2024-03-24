@@ -30,25 +30,64 @@ public class AirRMIT {
 
                 do {
 
-                    boolean validLogin = false;
-                    do {
+                    boolean validLogin = false; 
+                    boolean failedLogin = false;
+                    int remainingAttempts = 3;
+                    String inputEmail = "";
+                    String inputPassword;
 
+                        System.out.println("");
+                        System.out.println("*".repeat(50));
+                        System.out.println("Existing User Login");
+                        System.out.println("*".repeat(50));
+                    
+
+                    while (remainingAttempts >= 0 && validLogin == false && failedLogin == false) {
+                        
                         System.out.print("Email: ");
-                        String inputEmail = sc.nextLine();
+                        inputEmail = sc.nextLine();
                         System.out.print("Password: ");
-                        String inputPassword = sc.nextLine();
+                        inputPassword = sc.nextLine();
 
                         validLogin = checkLogin(inputEmail, inputPassword);
-                        if (!validLogin) {
-                            System.out.println("Incorrect login credentials. Please try again...");
+
+                        remainingAttempts--;
+
+                        if (remainingAttempts > 0 && validLogin == false) {
+                            System.out.println("Incorrect login credentials. " + remainingAttempts + " attempts remaining...");
+                        } else if (remainingAttempts == 0 && validLogin == false) {
+                            System.out.println("Unsuccessful login attempts. Exiting to main portal...\n");
+                            failedLogin = true;
                         }
+                    }
 
-                    } while (!validLogin);
+                    if (failedLogin == true) {
+                        logout = true;
+                    } else {
+
+                        int staffSelection;
+
+                        do {
+                            System.out.println("");
+                            System.out.println("*".repeat(50));
+                            System.out.println("Hi " + inputEmail);
+                            System.out.println("*".repeat(50));
+                            System.out.println("");
+                            System.out.println("[1] Coming Soon");
+                            System.out.println("[2] Log out");
+
+                            staffSelection = validateSelection(2);
+                            
+                            if (staffSelection == 2) {
+                                System.out.println("Returning to portal menu...\n");
+                                logout = true;
+                            }
+                        
+                        } while (staffSelection != 2);
+
+
+                    }
                     
-                    System.out.println("Successful login");
-
-
-
                 } while (!logout);
                 break;
 
@@ -76,11 +115,13 @@ public class AirRMIT {
 
     private int portalMenu() {
 
+        System.out.println("*".repeat(50));
         System.out.println(name +" Service Portal");
+        System.out.println("*".repeat(50));
         System.out.println("");
-        System.out.println("1. Existing User Login");
-        System.out.println("2. New Staff Registration");
-        System.out.println("3. Exit");
+        System.out.println("[1] Existing User Login");
+        System.out.println("[2] New Staff Registration");
+        System.out.println("[3] Exit");
         System.out.print("Selection: ");
 
         return validateSelection(3);
