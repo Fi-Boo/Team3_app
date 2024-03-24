@@ -1,9 +1,18 @@
+/* OUA/RMIT Software Engineering Project Management 2024 SP1
+ * Assignment 2
+ * Team 3
+ * 
+ * Angelo Lapuz         (s3914378)  Team Leader
+ * Melissa Rose         (s3427269)  2IC
+ * Nicholas Drinkwater  (s3508178)  Senior Stenographer/App Tester 
+ * Phi Van Bui          (s2008156)  Janitor
+ * 
+ */
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
-
 
 public class AirRMIT {
 
@@ -24,11 +33,11 @@ public class AirRMIT {
     public void run() {
 
         //hardcoded technicians - as per brief
-        users.add(new User("harrys@airrmit.com", "Harry", "Styles", 0430303030, "iamharry", "t1"));
-        users.add(new User("niallh@airrmit.com", "Niall", "Horan", 0431313131, "iamniall", "t1"));
-        users.add(new User("liamp@airrmit.com", "Liam", "Payne", 0432323232, "iamliam", "t1"));
-        users.add(new User("louist@airrmit.com", "Louis", "Tomlinson", 0433333333, "iamlouis", "t2"));
-        users.add(new User("zaynm@airrmit.com", "Zayne", "Malik", 0434343434, "iamzayne", "t2"));
+        users.add(new User("harrys@airrmit.com", "Harry Styles", "0430303030", "iamharry", "t1"));
+        users.add(new User("niallh@airrmit.com", "Niall Horan", "0431313131", "iamniall", "t1"));
+        users.add(new User("liamp@airrmit.com", "Liam Payne", "0432323232", "iamliam", "t1"));
+        users.add(new User("louist@airrmit.com", "Louis Tomlinson", "0433333333", "iamlouis", "t2"));
+        users.add(new User("zaynm@airrmit.com", "Zayne Malik", "0434343434", "iamzayne", "t2"));
 
         do {
             
@@ -37,178 +46,221 @@ public class AirRMIT {
             switch (selection) {
 			case (1):
 
-                boolean logout = false;
-
-                do {
-
-                    boolean validLogin = false; 
-                    boolean failedLogin = false;
-                    int remainingAttempts = 3;
-                    String inputEmail = "";
-                    String inputPassword;
-
-                        System.out.println("");
-                        System.out.println("*".repeat(50));
-                        System.out.println("Existing User Login");
-                        System.out.println("*".repeat(50));
-                    
-
-                    while (remainingAttempts >= 0 && validLogin == false && failedLogin == false) {
-                        
-                        System.out.print("Email: ");
-                        inputEmail = sc.nextLine();
-                        System.out.print("Password: ");
-                        inputPassword = sc.nextLine();
-
-                        validLogin = checkLogin(inputEmail, inputPassword);
-
-                        remainingAttempts--;
-
-                        if (remainingAttempts > 0 && validLogin == false) {
-                            System.out.println("Incorrect login credentials. " + remainingAttempts + " attempts remaining...");
-                        } else if (remainingAttempts == 0 && validLogin == false) {
-                            System.out.println("Unsuccessful login attempts. Exiting to main portal...\n");
-                            failedLogin = true;
-                        }
-                    }
-
-                    if (failedLogin == true) {
-                        logout = true;
-                    } else {
-
-                        loggedUser = setUser(inputEmail);
-                        
-                        int staffSelection;
-
-                        do {
-                            System.out.println("");
-                            System.out.println("=".repeat(50));
-                            System.out.println("Hi " + loggedUser.getFirstName());
-                            System.out.println("-".repeat(50));
-                            System.out.println("");
-                            System.out.println("[1] Coming Soon");
-                            System.out.println("[2] Log out");
-                            System.out.print("Selection: ");
-
-                            staffSelection = validateSelection(2);
-                            
-                            if (staffSelection == 2) {
-                                System.out.println("Returning to portal menu...\n");
-                                logout = true;
-                            }
-                        
-                        } while (staffSelection != 2);
-                    }
-                    
-                } while (!logout);
+                userRegistrationFeature();
                 break;
 
 			case (2):
 
-
-                System.out.println("");
-                System.out.println("*".repeat(50));
-                System.out.println("User Registration");
-                System.out.println("*".repeat(50));
-                System.out.println("");
-
-
-                String emailRegex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@" + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-                Pattern pattern = Pattern.compile (emailRegex);
-                
-                String userEmail;
-                boolean matchFound = false;
+                boolean logout = false;
 
                 do {
-                    System.out.print("Email Address: ");
-                    userEmail = sc.nextLine();
-                    Matcher matcher = pattern.matcher(userEmail);
-                    matchFound = matcher.find();
-                    if (matchFound == false) {
-                        System.out.println("Invalid email format. Please try again...");
-                    }
-                } while (matchFound == false);
-
-                String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{20,}$";
-                pattern = Pattern.compile (passwordRegex);
-                
-                String password;
-                matchFound = false;
-
-                do {
-                    System.out.print("Password: ");
-                    password = sc.nextLine();
-                    Matcher matcher = pattern.matcher(password);
-                    matchFound = matcher.find();
-                    if (matchFound == false) {
-                        System.out.println("Invalid password format. At least 1 upper case, 1 lower case, 1 number. Min length 20 characters. Please try again...");
-                    }
-                } while (matchFound == false);
-
-
-                String nameRegex = "^[A-Z][a-z\\-]*$";
-                pattern = Pattern.compile (nameRegex);
-
-                String firstName;
-
-                do {
-                    System.out.print("First Name: ");
-                    firstName = sc.nextLine();
-
-                    Matcher matcher = pattern.matcher(firstName);
-                    matchFound = matcher.find();
-
-                    if (matchFound == false) {
-                        System.out.println("First name cannot be blank. Must begin with an Upper case letter. Please try again...");
-                    }
-                } while (matchFound == false);
-
-                String surname;
-
-                do {
-                    System.out.print("Surname: ");
-                    surname = sc.nextLine();
-
-                    Matcher matcher = pattern.matcher(surname);
-                    matchFound = matcher.find();
-
-                    if (matchFound == false) {
-                        System.out.println("Surname name cannot be blank. Must begin with an Upper case letter. Please try again...");
-                    }
-                } while (matchFound == false);
-
-                String phoneNumber;
-                String phoneRegex = "^(0)[1-9](?:[0-9]{8}|(?:\\s[0-9]{3,4}){3})$";
-                pattern = Pattern.compile (phoneRegex);
-
-                do {
-                    System.out.print("Mobile number: ");
-                    phoneNumber = sc.nextLine();
-                    Matcher matcher = pattern.matcher(phoneNumber);
-                    matchFound = matcher.find();
-                    if (matchFound == false) {
-                        System.out.println("Invalid AUS mobile number. Must be in format 04xxxxxxxx. Please try again...");
-                    }
-                } while (matchFound == false);
-
-
-                System.out.println("user details:");
-                System.out.println(userEmail);
-                System.out.println(firstName + " " + surname);
-                System.out.println(password);
-                System.out.println(phoneNumber);
-
-
-
+                    
+                    logout = existingUserFeature();
+                    
+                } while (!logout);
 				break;
+
             case (3):
                 exit = true;
                 break;
             }
 
         } while(!exit);
+
+        System.out.println("End");
         
     }
+
+
+    //main Portal menu
+    private int portalMenu() {
+
+        System.out.println("*".repeat(50));
+        System.out.println(name +" Service Portal");
+        System.out.println("*".repeat(50));
+        System.out.println("");
+        System.out.println("[1] New Staff Registration");
+        System.out.println("[2] Existing User Login");
+        System.out.println("[3] Exit");
+        System.out.print("Selection: ");
+
+        return validateSelection(3);
+
+    }
+
+    // Submenu. takes menu title as a String
+    private void showSubmenu(String string){
+        System.out.println("");
+        System.out.println("*".repeat(50));
+        System.out.println(string);
+        System.out.println("*".repeat(50));
+        System.out.println("");
+    }
+
+    /* User Registration Feature        COMPLETE
+     * 1. Add user email                COMPLETE
+     *      - validate via regex        COMPLETE
+     *      - check for existing email  COMPLETE
+     * 2. Add full name                 COMPLETE
+     *      - validate via regex        COMPLETE
+     * 3. Add password                  COMPLETE
+     *      - validate via regex        COMPLETE
+     * 4. Add number                    COMPLETE
+     *      - validate via regex        COMPLETE
+     */
+    private void userRegistrationFeature() {
+
+        showSubmenu("User Registration");
+
+        String emailRegex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@" + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+        String emailErrorMessage = "Invalid email format. Please try again...";
+        String validEmail = null;
+
+        boolean userExists = true;
+        do {
+
+            validEmail = validateRegex("Email Address: ", emailRegex, emailErrorMessage );
+            userExists = checkEmail(validEmail);
+            if (userExists) {
+                System.out.println("Email already registered. Please try again...");
+            }
+
+        } while (userExists);
+
+        String passwordLength = "5";
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{"+passwordLength+",}$";
+        String passwordErrorMessage = "Invalid password format. At least 1 upper case, 1 lower case, 1 number. Min length " + passwordLength + " characters. Please try again...";
+        
+        String validPassword = validateRegex("Password: ", passwordRegex, passwordErrorMessage);
+
+        String nameRegex = "^[A-Z][a-z]*(?: [A-Z][a-z]*)+$";
+        String nameErrorMessage = "Full ame cannot be blank. Must begin with an Upper case letter and have a space between first name and surname. Please try again...";
+
+        String validName = validateRegex("Full Name: ", nameRegex, nameErrorMessage);
+        
+        String phoneRegex = "^(0)[1-9](?:[0-9]{8}|(?:\\s[0-9]{3,4}){3})$";
+        String numberErrorMessage = "Invalid AUS mobile number. Must be in format 04xxxxxxxx. Please try again...";
+
+        String validNumber = validateRegex("Mobile contact: ", phoneRegex, numberErrorMessage);
+
+        System.out.println("user details:");
+        System.out.println(validEmail);
+        System.out.println(validPassword);
+        System.out.println(validName);
+        System.out.println(validNumber);
+
+        users.add(new User(validEmail.toLowerCase(), validName, validNumber, validPassword));
+
+    }
+
+    // validates user input based on regex value
+    private String validateRegex(String title, String regex, String errorMsg) {
+        
+        Pattern pattern = Pattern.compile (regex);
+        String userInput;
+        boolean matchFound = false;
+
+        do {
+            System.out.print(title);
+            userInput = sc.nextLine();
+            Matcher matcher = pattern.matcher(userInput);
+            matchFound = matcher.find();
+            if (matchFound == false) {
+                System.out.println(errorMsg);
+            }
+        } while (matchFound == false);
+
+        return userInput;
+    }
+
+    // checks for existing email based on user input 
+    private boolean checkEmail(String email) {
+
+        for (User user: users) {
+            if (user.getEmail().equals(email.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* Existing User Feature
+     * 1.Login
+     *      - validates email/password input    COMPLETE
+     * 2.Loads submenu based on user Role
+     * 3.Role(S)
+     *      - add Ticket
+     *      - view current tickets
+     * 4.Role(T1/T2)
+     *      - view current jobs
+     *      - edit job classification
+     *          - relocate job if applicable
+     *      - close job
+     *      - view all jobs
+     *      - reopen job
+     * 5. Logout (returns to portal main)       COMPLETE
+     */
+    private boolean existingUserFeature() {
+        
+        boolean validLogin = false; 
+        boolean failedLogin = false;
+        int remainingAttempts = 3;
+        String inputEmail = "";
+        String inputPassword;
+
+        showSubmenu("Existing User Login");
+            
+        while (remainingAttempts >= 0 && validLogin == false && failedLogin == false) {
+            
+            System.out.print("Email: ");
+            inputEmail = sc.nextLine();
+            System.out.print("Password: ");
+            inputPassword = sc.nextLine();
+
+            validLogin = checkLogin(inputEmail, inputPassword);
+
+            remainingAttempts--;
+
+            if (remainingAttempts > 0 && validLogin == false) {
+                System.out.println("Incorrect login credentials. " + remainingAttempts + " attempts remaining...");
+            } else if (remainingAttempts == 0 && validLogin == false) {
+                System.out.println("Unsuccessful login attempts. Exiting to main portal...\n");
+                failedLogin = true;
+            }
+        }
+
+        if (failedLogin == true) {
+            return true;
+        } else {
+
+            loggedUser = setUser(inputEmail);
+            
+            int staffSelection;
+
+            do {
+                System.out.println("");
+                System.out.println("=".repeat(50));
+                System.out.println("Hi " + loggedUser.getFullName());
+                System.out.println("-".repeat(50));
+                System.out.println("");
+                System.out.println("[1] Coming Soon");
+                System.out.println("[2] Log out");
+                System.out.print("Selection: ");
+
+                staffSelection = validateSelection(2);
+                
+                if (staffSelection == 2) {
+                    System.out.println("Returning to portal menu...\n");
+                    return true;
+                }
+            
+            } while (staffSelection != 2);
+        }
+        return false;
+    }
+                    
+
+
 
     private User setUser(String inputEmail) {
 
@@ -230,20 +282,9 @@ public class AirRMIT {
         return false;
     }
 
-    private int portalMenu() {
 
-        System.out.println("*".repeat(50));
-        System.out.println(name +" Service Portal");
-        System.out.println("*".repeat(50));
-        System.out.println("");
-        System.out.println("[1] Existing User Login");
-        System.out.println("[2] New Staff Registration");
-        System.out.println("[3] Exit");
-        System.out.print("Selection: ");
 
-        return validateSelection(3);
-
-    }
+    
 
     private int validateSelection(int selection) {
         
