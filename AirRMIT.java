@@ -5,7 +5,7 @@
  * Angelo Lapuz         (s3914378)  Team Leader
  * Melissa Rose         (s3427269)  2IC
  * Nicholas Drinkwater  (s3508178)  Senior Stenographer/App Tester 
- * Phi Van Bui          (s2008156)  Janitor
+ * Phi Van Bui          (s2008156)  Senior Procrastinator/Janitor
  * 
  */
 
@@ -13,6 +13,12 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+
 
 public class AirRMIT {
 
@@ -33,11 +39,11 @@ public class AirRMIT {
     public void run() {
 
         //hardcoded technicians - as per brief
-        users.add(new User("harrys@airrmit.com", "Harry Styles", "0430303030", "iamharry", "t1"));
-        users.add(new User("niallh@airrmit.com", "Niall Horan", "0431313131", "iamniall", "t1"));
-        users.add(new User("liamp@airrmit.com", "Liam Payne", "0432323232", "iamliam", "t1"));
-        users.add(new User("louist@airrmit.com", "Louis Tomlinson", "0433333333", "iamlouis", "t2"));
-        users.add(new User("zaynm@airrmit.com", "Zayne Malik", "0434343434", "iamzayne", "t2"));
+        users.add(new User("harrys@airrmit.com", "Harry Styles", "0430303030", hashPassword("iamharry", generateSalt()), "t1"));
+        users.add(new User("niallh@airrmit.com", "Niall Horan", "0431313131", hashPassword("iamniall", generateSalt()), "t1"));
+        users.add(new User("liamp@airrmit.com", "Liam Payne", "0432323232", hashPassword("iamliam", generateSalt()), "t1"));
+        users.add(new User("louist@airrmit.com", "Louis Tomlinson", "0433333333", hashPassword("iamlouis", generateSalt()), "t2"));
+        users.add(new User("zaynm@airrmit.com", "Zayne Malik", "0434343434", hashPassword("iamzayne", generateSalt()), "t2"));
 
         do {
             
@@ -187,17 +193,17 @@ public class AirRMIT {
     /* Existing User Feature
      * 1.Login
      *      - validates email/password input    COMPLETE
-     * 2.Loads submenu based on user Role
-     * 3.Role(S)
-     *      - add Ticket
-     *      - view current tickets
+     * 2.Loads submenu based on user Role       COMING SOON
+     * 3.Role(S)                                
+     *      - add Ticket                        COMING SOON
+     *      - view current tickets              COMING SOON         
      * 4.Role(T1/T2)
-     *      - view current jobs
-     *      - edit job classification
-     *          - relocate job if applicable
-     *      - close job
-     *      - view all jobs
-     *      - reopen job
+     *      - view current jobs                 COMING SOON
+     *      - edit job classification           COMING SOON
+     *          - relocate job if applicable    COMING SOON
+     *      - close job                         COMING SOON
+     *      - view all jobs                     COMING SOON
+     *      - reopen job                        COMING SOON
      * 5. Logout (returns to portal main)       COMPLETE
      */
     private boolean existingUserFeature() {
@@ -259,9 +265,6 @@ public class AirRMIT {
         return false;
     }
                     
-
-
-
     private User setUser(String inputEmail) {
 
         for (User user: users) {
@@ -275,16 +278,12 @@ public class AirRMIT {
     private boolean checkLogin(String inputEmail, String inputPassword) {
         
         for (User user: users) {
-            if (user.getEmail().equalsIgnoreCase(inputEmail) && user.getPassword().equals(inputPassword)) {
+            if (user.getEmail().equalsIgnoreCase(inputEmail) && validatePassword(user.getPassword(),inputPassword) == true) {
                 return true;
             }
         }
         return false;
     }
-
-
-
-    
 
     private int validateSelection(int selection) {
         
@@ -308,5 +307,44 @@ public class AirRMIT {
         return input;
     }
 
+
+    private String generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+        return Base64.getEncoder().encodeToString(salt);
+    }
+
+    private String hashPassword(String password, String salt) {
+
+        String finalPassword = null;
+
+        try {
+        
+            String saltedPassword = password + salt;
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedPassword = md.digest(saltedPassword.getBytes());
+            finalPassword = Base64.getEncoder().encodeToString(hashedPassword) + salt;
+            return finalPassword;
+
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("something wrong");
+        }
+
+        return null;
+
+    }
+
+    private boolean validatePassword(String storedPassword, String inputPassword) {
+
+        String salt = storedPassword.substring(storedPassword.length() - 24);
+        System.out.println(salt);
+
+        if (storedPassword.equals(hashPassword(inputPassword, salt))) {
+            return true;
+        }
+
+        return false;
+    }
 
 }
