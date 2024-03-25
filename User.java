@@ -55,4 +55,8 @@ public class User {
         return this.staffType;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }

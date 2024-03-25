@@ -36,6 +36,8 @@ public class AirRMIT {
 
     boolean exit = false;
 
+    String passwordLength = "5";
+
     public void run() {
 
         //hardcoded technicians - as per brief
@@ -44,36 +46,41 @@ public class AirRMIT {
         users.add(new User("liamp@airrmit.com", "Liam Payne", "0432323232", hashPassword("iamliam", generateSalt()), "t1"));
         users.add(new User("louist@airrmit.com", "Louis Tomlinson", "0433333333", hashPassword("iamlouis", generateSalt()), "t2"));
         users.add(new User("zaynm@airrmit.com", "Zayne Malik", "0434343434", hashPassword("iamzayne", generateSalt()), "t2"));
+        users.add(new User("angelol@airrmit.com", "Angelo Lapuz", "0433914378", hashPassword("iamangelo", generateSalt())));
+        users.add(new User("belrose@airrmit.com", "Belrose Gunzel", "0433427269", hashPassword("iambelrose", generateSalt())));
+        users.add(new User("nickd@airrmit.com", "Nick Drinkwater", "0433508178", hashPassword("iambick", generateSalt())));
+        users.add(new User("phib@airrmit.com", "Phi Bui", "0432008156", hashPassword("iamphi", generateSalt())));
+
 
         do {
             
             int selection = portalMenu();
 
             switch (selection) {
-			case (1):
+                case (1):
 
-                userRegistrationFeature();
-                break;
+                    userRegistrationFeature();
+                    break;
 
-			case (2):
+                case (2):
 
-                boolean logout = false;
+                    boolean logout = false;
 
-                do {
-                    
-                    logout = existingUserFeature();
-                    
-                } while (!logout);
-				break;
+                    do {
+                        
+                        logout = existingUserFeature();
+                        
+                    } while (!logout);
+                    break;
 
-            case (3):
-                exit = true;
-                break;
+                case (3):
+                    exit = true;
+                    break;
             }
 
         } while(!exit);
 
-        System.out.println("End");
+        System.out.println("\nExiting Program...\n");
         
     }
 
@@ -133,7 +140,6 @@ public class AirRMIT {
 
         } while (userExists);
 
-        String passwordLength = "5";
         String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{"+passwordLength+",}$";
         String passwordErrorMessage = "Invalid password format. At least 1 upper case, 1 lower case, 1 number. Min length " + passwordLength + " characters. Please try again...";
         
@@ -149,13 +155,14 @@ public class AirRMIT {
 
         String validNumber = validateRegex("Mobile contact: ", phoneRegex, numberErrorMessage);
 
-        System.out.println("user details:");
+        System.out.println("");
+        System.out.println("New user registered with the following details");
         System.out.println(validEmail);
-        System.out.println(validPassword);
         System.out.println(validName);
         System.out.println(validNumber);
+        System.out.println("");
 
-        users.add(new User(validEmail.toLowerCase(), validName, validNumber, validPassword));
+        users.add(new User(validEmail.toLowerCase(), validName, validNumber, hashPassword(validPassword, generateSalt())));
 
     }
 
@@ -194,6 +201,7 @@ public class AirRMIT {
      * 1.Login
      *      - validates email/password input    COMPLETE
      *      - password salt/hashing             COMPLETE
+     *      - forgot password                   COMPLETE
      * 2.Loads submenu based on user Role       COMING SOON
      * 3.Role(S)                                
      *      - add Ticket                        COMING SOON
@@ -209,63 +217,94 @@ public class AirRMIT {
      */
     private boolean existingUserFeature() {
         
-        boolean validLogin = false; 
-        boolean failedLogin = false;
-        int remainingAttempts = 3;
-        String inputEmail = "";
-        String inputPassword;
+        int selection = 0;
+        boolean logout = false;
 
-        showSubmenu("Existing User Login");
-            
-        while (remainingAttempts >= 0 && validLogin == false && failedLogin == false) {
-            
-            System.out.print("Email: ");
-            inputEmail = sc.nextLine();
-            System.out.print("Password: ");
-            inputPassword = sc.nextLine();
+        do {
 
-            validLogin = checkLogin(inputEmail, inputPassword);
+            showSubmenu("Existing User Login");
 
-            remainingAttempts--;
+            System.out.println("[1] Login");
+            System.out.println("[2] Forgot Password");
+            System.out.println("[3] Return to Main Portal");
+            System.out.print("Selection: ");
+            selection = validateSelection(3);
 
-            if (remainingAttempts > 0 && validLogin == false) {
-                System.out.println("Incorrect login credentials. " + remainingAttempts + " attempts remaining...");
-            } else if (remainingAttempts == 0 && validLogin == false) {
-                System.out.println("Unsuccessful login attempts. Exiting to main portal...\n");
-                failedLogin = true;
-            }
-        }
+            switch (selection) {
+                case(1):
 
-        if (failedLogin == true) {
-            return true;
-        } else {
+                    boolean validLogin = false; 
+                    boolean failedLogin = false;
+                    int remainingAttempts = 3;
+                    String inputEmail = "";
+                    String inputPassword;
 
-            loggedUser = setUser(inputEmail);
-            
-            int staffSelection;
-
-            do {
-                System.out.println("");
-                System.out.println("=".repeat(50));
-                System.out.println("Hi " + loggedUser.getFullName());
-                System.out.println("-".repeat(50));
-                System.out.println("");
-                System.out.println("[1] Coming Soon");
-                System.out.println("[2] Log out");
-                System.out.print("Selection: ");
-
-                staffSelection = validateSelection(2);
+                    while (remainingAttempts >= 0 && validLogin == false && failedLogin == false) {
                 
-                if (staffSelection == 2) {
-                    System.out.println("Returning to portal menu...\n");
-                    return true;
-                }
-            
-            } while (staffSelection != 2);
-        }
-        return false;
-    }
+                        System.out.print("Email: ");
+                        inputEmail = sc.nextLine();
+                        System.out.print("Password: ");
+                        inputPassword = sc.nextLine();
+
+                        validLogin = checkLogin(inputEmail, inputPassword);
+
+                        remainingAttempts--;
+
+                        if (remainingAttempts > 0 && validLogin == false) {
+                            System.out.println("Incorrect login credentials. " + remainingAttempts + " attempts remaining...");
+                        } else if (remainingAttempts == 0 && validLogin == false) {
+                            System.out.println("\nUnsuccessful login attempts. Exiting to main portal...\n");
+                            failedLogin = true;
+                        }
+                    }
                     
+                    if (failedLogin == true) {
+                        return true;
+                    } else {
+
+                        loggedUser = setUser(inputEmail);
+                        
+                        int staffSelection;
+
+                        do {
+                            System.out.println("");
+                            System.out.println("=".repeat(50));
+                            System.out.println("Hi " + loggedUser.getFullName());
+                            System.out.println("-".repeat(50));
+                            System.out.println("");
+                            System.out.println("[1] Check user credentials list");
+                            System.out.println("[2] Log out");
+                            System.out.print("Selection: ");
+
+                            staffSelection = validateSelection(2);
+
+                            switch (staffSelection) {
+                            case (1):
+                                printAllUserCredentials();
+                                break;
+                            case(2):
+                                System.out.println("\nReturning to portal menu...\n"); 
+                                logout = true;
+                            }
+                        
+                        } while (staffSelection != 2);
+                    }
+                    break;
+                case(2):         
+                    resetPassword();
+                    break;
+                case(3):
+                    System.out.println("\nReturning to portal menu...\n"); 
+                    logout = true;
+                    break;
+            }
+            
+        } while (selection != 3 || logout != true);
+        
+        return logout;     
+        
+    }
+
     private User setUser(String inputEmail) {
 
         for (User user: users) {
@@ -339,7 +378,6 @@ public class AirRMIT {
     private boolean validatePassword(String storedPassword, String inputPassword) {
 
         String salt = storedPassword.substring(storedPassword.length() - 24);
-        System.out.println(salt);
 
         if (storedPassword.equals(hashPassword(inputPassword, salt))) {
             return true;
@@ -347,5 +385,72 @@ public class AirRMIT {
 
         return false;
     }
+
+    //temp function to check that passwords are being hashed/salted    
+    private void printAllUserCredentials() {
+        for (User user: users) {
+            System.out.println("Email: " + user.getEmail());
+            System.out.println("Password: " + user.getPassword());
+            System.out.println("");
+        }
+    }
+
+
+    private void resetPassword() {
+
+        System.out.println("");
+        System.out.println("=".repeat(50));
+        System.out.println("Password Reset menu");
+        System.out.println("-".repeat(50));
+        System.out.println("");
+
+        boolean valid = false, validNumber = false;
+        String email = null;
+        int remainingAttempts = 3;
+        
+        do {
+            
+            System.out.print("Email: ");
+            email = sc.nextLine();
+            valid = checkEmail(email);
+            if (valid == false) {
+                System.out.println("No matching Email found. Try again...");
+            }
+
+        } while (valid == false);
+
+        while (remainingAttempts > 0 && validNumber == false ) {
+            System.out.print("Mobile Number: ");
+            String number = sc.nextLine();
+            for (User user: users) {
+                if (user.getNumber().equals(number)) {
+                    validNumber = true;
+                }     
+            }
+
+            remainingAttempts--;
+            System.out.println("Mismatch with record. "+ remainingAttempts+ " attempts remaining...");
+            
+        }
+        if (remainingAttempts == 0) {
+            System.out.println("");
+            System.out.println("Returning to Login Selection...");
+        }
+        if (validNumber == true) {
+            
+            String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{"+passwordLength+",}$";
+            String passwordErrorMessage = "Invalid password format. At least 1 upper case, 1 lower case, 1 number. Min length " + passwordLength + " characters. Please try again...";
+            
+            String password = validateRegex("New Password: ", passwordRegex, passwordErrorMessage);
+
+            for (User user: users) {
+                if (user.getEmail().equals(email)) {
+                    user.setPassword(hashPassword(password, generateSalt()));
+                }
+            }
+        }
+        
+    }
+
 
 }
