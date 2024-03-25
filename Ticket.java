@@ -7,13 +7,12 @@ public class Ticket {
     String assignedTo;
     String ClosureDateTime;
     
-    public Ticket(String description, String severity, String createdBy, String assignedTo) {
+    public Ticket(String description, String severity, String createdBy) {
         super();
         this.description = description;
         this.severity = severity;
         this.createdBy = createdBy;
         this.status = "open";
-        this.assignedTo = assignedTo;
         this.ClosureDateTime = null;
     }
 

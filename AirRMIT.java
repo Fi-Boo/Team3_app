@@ -276,9 +276,9 @@ public class AirRMIT {
 
                             if (loggedUser.getStaffType() == "s") {
                               
-                                showTickets();
-
                                 do {
+                                    
+                                    showTickets();
 
                                     System.out.println("");
                                     System.out.println("[1] Open New Ticket");
@@ -297,9 +297,6 @@ public class AirRMIT {
                                             System.out.println("");
 
                                             openTicket();
-                                            showTickets();
-
-
 
                                             break;
                                         case (2):
@@ -310,18 +307,76 @@ public class AirRMIT {
                                 } while (selection != 2);
 
                             } else {
+
+                                do {
                                 
-                                //display open jobs
+                                    showAssignedJobs();
 
-                                System.out.println("");
-                                System.out.println("[1] Edit Job");
-                                System.out.println("[2] Reopen Job");
-                                System.out.println("[3] Log out");
-                                System.out.print("Selection: ");
+                                    System.out.println("");
+                                    System.out.println("[1] Edit/Close Job");
+                                    System.out.println("[2] Reopen Job");
+                                    System.out.println("[3] Log out");
+                                    System.out.print("Selection: ");
 
-                            }
+                                    selection = validateSelection(4);
+
+                                    switch(selection) {
+                                        case(1):
+
+                                            showAssignedJobs();
+
+                                            /* 
+                                             * showClosedJobs
+                                             * key  C - closed      - can be reopened
+                                             *      A - archived    - cannot be reopened
+                                             * 
+                                             *  Select Job
+                                             *  input job number
+                                             *  output job
+                                             *      [1] edit
+                                             *          - Set severity
+                                             *              [1] Low
+                                             *              [2] Medium
+                                             *              [3] High
+                                             *                  (update variable in ticket)
+                                             *                  (reallocate if necessary)
+                                             *      [2] close job
+                                             *          - Set closure status
+                                             *              [1] closed [resolved]
+                                             *              [2] close [unresolved]
+                                             *                  (update variables in ticket)
+                                             * 
+                                             */
+                                            
+
+                                            System.out.println("Edit/Close Job");
+                                            break;
+                                        case(2):
+
+
+                                            /* showClosedJobs
+                                             * key  C - closed      - can be reopened
+                                             *      A - archived    - cannot be reopened
+                                             * 
+                                             * select job to reopen
+                                             * input job number
+                                             * update/remove variables from job
+                                             * set job to tech who opened it
+                                             * 
+                                             * 
+                                             */
+
+                                            System.out.println("Reopen Job");
+                                            break;
+
+                                        case(3):
+
+                                            logout = true;
+                                    }
+
+                                } while (selection != 3);
                             
-                        
+                            }
                         } while (logout == false);
                     }
                     break;
@@ -340,6 +395,30 @@ public class AirRMIT {
         return logout;     
         
     }
+
+    private void showAssignedJobs() {
+        
+        System.out.println("-".repeat(50));
+        System.out.println("Open Jobs");
+
+        int counter = 1;
+        for (Ticket ticket: tickets) {
+            if (ticket.getCreatedBy().equals(loggedUser.getEmail())) {
+                
+                System.out.println("-".repeat(50));
+                System.out.println("Job #" + counter);
+                System.out.println("Description: " + ticket.getDescription());
+                System.out.println("Severity: " + ticket.getSeverity());
+                counter++;
+            }
+        }
+        if (counter == 1) {
+            System.out.println("None ");
+        }
+    }
+
+    
+
 
     private void showTickets() {
         
@@ -400,11 +479,22 @@ public class AirRMIT {
             severity = "High";
         }
 
-        String staffAllocated = getAllocation(severity);
+        Ticket ticket = new Ticket(description, severity, loggedUser.getEmail());
+
+        allocateTicket(ticket);
         
-        tickets.add(new Ticket(description, severity, loggedUser.getEmail(), staffAllocated));
+        tickets.add(ticket);
 
         System.out.println("\nTicket successfully opened...");
+    }
+
+
+    private void allocateTicket(Ticket ticket) {
+
+        String staffAllocated = getAllocation(ticket.getSeverity());
+
+        ticket.setAssignedTo(staffAllocated);
+
     }
 
     private String getAllocation(String severity) {
