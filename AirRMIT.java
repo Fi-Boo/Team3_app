@@ -18,17 +18,20 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Collections;
 
 
 public class AirRMIT {
 
     private String name;
     private ArrayList<User> users;
+    private ArrayList<Ticket> tickets;
     private User loggedUser;
 
     public AirRMIT(String string) {
         this.name = string;
         this.users = new ArrayList<User>();
+        this.tickets = new ArrayList<Ticket>();
         this.loggedUser = null;
     }
 
@@ -202,10 +205,10 @@ public class AirRMIT {
      *      - validates email/password input    COMPLETE
      *      - password salt/hashing             COMPLETE
      *      - forgot password                   COMPLETE
-     * 2.Loads submenu based on user Role       COMING SOON
+     * 2.Loads submenu based on user Role       COMPLETE
      * 3.Role(S)                                
-     *      - add Ticket                        COMING SOON
-     *      - view current tickets              COMING SOON         
+     *      - add Ticket                        COMPLETE
+     *      - view current tickets              COMPLETE         
      * 4.Role(T1/T2)
      *      - view current jobs                 COMING SOON
      *      - edit job classification           COMING SOON
@@ -263,8 +266,6 @@ public class AirRMIT {
                     } else {
 
                         loggedUser = setUser(inputEmail);
-                        
-                        int staffSelection;
 
                         do {
                             System.out.println("");
@@ -272,22 +273,56 @@ public class AirRMIT {
                             System.out.println("Hi " + loggedUser.getFullName());
                             System.out.println("-".repeat(50));
                             System.out.println("");
-                            System.out.println("[1] Check user credentials list");
-                            System.out.println("[2] Log out");
-                            System.out.print("Selection: ");
 
-                            staffSelection = validateSelection(2);
+                            if (loggedUser.getStaffType() == "s") {
+                              
+                                showTickets();
 
-                            switch (staffSelection) {
-                            case (1):
-                                printAllUserCredentials();
-                                break;
-                            case(2):
-                                System.out.println("\nReturning to portal menu...\n"); 
-                                logout = true;
+                                do {
+
+                                    System.out.println("");
+                                    System.out.println("[1] Open New Ticket");
+                                    System.out.println("[2] Log Out");
+                                    System.out.print("Selection: ");
+
+                                    selection = validateSelection(2);
+
+                                    switch (selection) {
+                                        case (1):
+
+                                            System.out.println("");
+                                            System.out.println("=".repeat(50));
+                                            System.out.println("New Ticket Menu");
+                                            System.out.println("-".repeat(50));
+                                            System.out.println("");
+
+                                            openTicket();
+                                            showTickets();
+
+
+
+                                            break;
+                                        case (2):
+                                            logout = true;
+                                    }
+
+
+                                } while (selection != 2);
+
+                            } else {
+                                
+                                //display open jobs
+
+                                System.out.println("");
+                                System.out.println("[1] Edit Job");
+                                System.out.println("[2] Reopen Job");
+                                System.out.println("[3] Log out");
+                                System.out.print("Selection: ");
+
                             }
+                            
                         
-                        } while (staffSelection != 2);
+                        } while (logout == false);
                     }
                     break;
                 case(2):         
@@ -296,6 +331,7 @@ public class AirRMIT {
                 case(3):
                     System.out.println("\nReturning to portal menu...\n"); 
                     logout = true;
+                    loggedUser = null;
                     break;
             }
             
@@ -304,6 +340,117 @@ public class AirRMIT {
         return logout;     
         
     }
+
+    private void showTickets() {
+        
+        System.out.println("-".repeat(50));
+        System.out.println("Open Tickets");
+
+        int counter = 1;
+        for (Ticket ticket: tickets) {
+            if (ticket.getCreatedBy().equals(loggedUser.getEmail())) {
+                
+                System.out.println("-".repeat(50));
+                System.out.println("Ticket #" + counter);
+                System.out.println("Description: " + ticket.getDescription());
+                System.out.println("Severity: " + ticket.getSeverity());
+                System.out.println("Assigned to: " + getUserByEmail(ticket.getAssignedTo()));
+                counter++;
+            }
+        }
+        if (counter == 1) {
+            System.out.println("None ");
+        }
+    }
+
+
+    private String getUserByEmail(String assignedTo) {
+        
+        String name = null;
+
+        for (User user: users) {
+            if (user.getEmail().equals(assignedTo)) {
+                name = user.getFullName();
+            }
+        }
+        return name;
+    }
+
+
+    private void openTicket() {
+        
+
+        String description = notBlank("Issue description: ");
+        
+        System.out.println("");
+        System.out.println("= Severity =");
+        System.out.println("[1] Low ");
+        System.out.println("[2] Medium ");
+        System.out.println("[3] High ");
+        System.out.print("Selection: ");
+
+        int selection = validateSelection(3);
+        String severity;
+
+        if (selection == 1) {
+            severity = "Low";
+        }else if (selection == 2) {
+            severity = "Medium";
+        }else {
+            severity = "High";
+        }
+
+        String staffAllocated = getAllocation(severity);
+        
+        tickets.add(new Ticket(description, severity, loggedUser.getEmail(), staffAllocated));
+
+        System.out.println("\nTicket successfully opened...");
+    }
+
+    private String getAllocation(String severity) {
+
+        ArrayList<String> techs = new ArrayList<String>();
+      
+        if (severity.equals("Low") || severity.equals("Medium")) {
+            techs.add("harrys@airrmit.com");
+            techs.add("niallh@airrmit.com");
+            techs.add("liamp@airrmit.com");
+        } else {
+            techs.add("louist@airrmit.com");
+            techs.add("zaynm@airrmit.com");
+        }
+
+        ArrayList<Integer> count = new ArrayList<Integer>();
+
+        //calculations to determine who to get the task.
+        for (String tech: techs) {
+            int counter = 0;
+            for (Ticket ticket: tickets) {
+                if (ticket.getAssignedTo().equals(tech)) {
+                    counter++;
+                }
+            }
+            count.add(counter);
+        }
+
+        int lowest = count.indexOf(Collections.min(count));     
+        String allocatedTech = techs.get(lowest);
+
+        return allocatedTech;
+    }
+
+
+    private String notBlank(String description) {
+
+        String input;
+        do {
+            System.out.println("-".repeat(50));
+            System.out.println(description);
+            input = sc.nextLine();
+        } while (input.isBlank());
+        return input;
+    }
+
 
     private User setUser(String inputEmail) {
 
@@ -386,16 +533,6 @@ public class AirRMIT {
         return false;
     }
 
-    //temp function to check that passwords are being hashed/salted    
-    private void printAllUserCredentials() {
-        for (User user: users) {
-            System.out.println("Email: " + user.getEmail());
-            System.out.println("Password: " + user.getPassword());
-            System.out.println("");
-        }
-    }
-
-
     private void resetPassword() {
 
         System.out.println("");
@@ -451,6 +588,4 @@ public class AirRMIT {
         }
         
     }
-
-
 }
