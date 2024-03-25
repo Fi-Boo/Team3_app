@@ -278,7 +278,7 @@ public class AirRMIT {
                               
                                 do {
                                     
-                                    showTickets();
+                                    showTickets("open");
 
                                     System.out.println("");
                                     System.out.println("[1] Open New Ticket");
@@ -310,7 +310,10 @@ public class AirRMIT {
 
                                 do {
                                 
-                                    showAssignedJobs();
+                                    showAssignedJobs("open");
+                                    System.out.println("-".repeat(50));
+                                    showAssignedJobs("closed");
+                                    System.out.println("-".repeat(50));
 
                                     System.out.println("");
                                     System.out.println("[1] Edit/Close Job");
@@ -323,10 +326,14 @@ public class AirRMIT {
                                     switch(selection) {
                                         case(1):
 
-                                            showAssignedJobs();
+                                            System.out.println("=".repeat(50));
+                                            System.out.println("= Open Job List =");
+                                            System.out.println("=".repeat(50));
+                                            showAssignedJobs("open");
+
 
                                             /* 
-                                             * showClosedJobs
+                                             * 
                                              * key  C - closed      - can be reopened
                                              *      A - archived    - cannot be reopened
                                              * 
@@ -347,14 +354,14 @@ public class AirRMIT {
                                              *                  (update variables in ticket)
                                              * 
                                              */
-                                            
 
-                                            System.out.println("Edit/Close Job");
                                             break;
                                         case(2):
 
 
-                                            /* showClosedJobs
+                                            showAssignedJobs("closed");
+
+                                            /* 
                                              * key  C - closed      - can be reopened
                                              *      A - archived    - cannot be reopened
                                              * 
@@ -396,17 +403,20 @@ public class AirRMIT {
         
     }
 
-    private void showAssignedJobs() {
+    private void showAssignedJobs(String status) {
         
         System.out.println("-".repeat(50));
-        System.out.println("Open Jobs");
+        System.out.println(status +" Jobs");
 
         int counter = 1;
         for (Ticket ticket: tickets) {
-            if (ticket.getCreatedBy().equals(loggedUser.getEmail())) {
+            if (ticket.getCreatedBy().equals(loggedUser.getEmail()) && ticket.getStatus().substring(0,4).equals(status.substring(0,4))) {
                 
                 System.out.println("-".repeat(50));
                 System.out.println("Job #" + counter);
+                if (loggedUser.getStaffType().charAt(0) == 't') {
+                    System.out.println("Status: " + ticket.getStatus());
+                }
                 System.out.println("Description: " + ticket.getDescription());
                 System.out.println("Severity: " + ticket.getSeverity());
                 counter++;
@@ -420,14 +430,14 @@ public class AirRMIT {
     
 
 
-    private void showTickets() {
+    private void showTickets(String status) {
         
         System.out.println("-".repeat(50));
-        System.out.println("Open Tickets");
+        System.out.println(status +" Tickets");
 
         int counter = 1;
         for (Ticket ticket: tickets) {
-            if (ticket.getCreatedBy().equals(loggedUser.getEmail())) {
+            if (ticket.getCreatedBy().equals(loggedUser.getEmail()) && ticket.getStatus().equals(status)) {
                 
                 System.out.println("-".repeat(50));
                 System.out.println("Ticket #" + counter);
