@@ -193,6 +193,7 @@ public class AirRMIT {
     /* Existing User Feature
      * 1.Login
      *      - validates email/password input    COMPLETE
+     *      - password salt/hashing             COMPLETE
      * 2.Loads submenu based on user Role       COMING SOON
      * 3.Role(S)                                
      *      - add Ticket                        COMING SOON
