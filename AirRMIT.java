@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.Collections;
 
@@ -215,10 +217,19 @@ public class AirRMIT {
      *      - view current jobs                 COMPLETE
      *      - edit job classification           COMPLETE
      *          - relocate job if applicable    COMPLETE
-     *      - close job                         COMING SOON
-     *      - view all jobs                     COMING SOON
-     *      - reopen job                        COMING SOON
+     *      - close job                         COMPLETE
+     *      - view all jobs                     COMPLETE
+     *      - reopen job                        COMPLETE
+     *      - view archive list                 COMPLETE
+     *          - function to archive           COMPLETE
      * 5. Logout (returns to portal main)       COMPLETE
+     * 
+     * 6. TESTING
+     *      - create csv file with dummy data       INCOMPLETE
+     *      - create function to load dummy data    INCOMPLETE
+     *          - this will test archiveTickets()
+     * 
+     * 
      */
     private boolean existingUserFeature() {
         
@@ -269,6 +280,8 @@ public class AirRMIT {
 
                         loggedUser = setUser(inputEmail);
 
+                        archiveTickets();
+
                         do {
                             System.out.println("");
                             System.out.println("=".repeat(50));
@@ -316,6 +329,8 @@ public class AirRMIT {
                                 
                                     showTickets("open");
                                     showTickets("closed");
+                                    showTickets("archived");
+                                    
                                     System.out.println("=".repeat(50));
 
                                     System.out.println("");
@@ -335,7 +350,7 @@ public class AirRMIT {
 
                                             showTickets("open");
 
-                                            int jobCount = countAssignedJobs("open");
+                                            int jobCount = countJobs("open");
 
                                             System.out.println("-".repeat(50));
                                             System.out.print("Edit Job#: ");
@@ -379,39 +394,66 @@ public class AirRMIT {
                                                     updateTicket(selectedTicket);
 
                                                     System.out.println("\nJob Severity changed...\n");
+
+                                                    break;
+
+                                                case (2):
+
+                                                    System.out.println("");
+                                                    System.out.println("Was the issue resolved?");
+                                                    System.out.println("[1] Yes");
+                                                    System.out.println("[2] No");
+                                                    System.out.print("Selection: ");
+
+                                                    int closingSelection = validateSelection(2);
+
+                                                    String closed;
+
+                                                    if (closingSelection == 1) {
+
+                                                        closed = "closed [Resolved]";
+
+                                                    } else {
+
+                                                        closed = "closed [Unresolved]";
+
+                                                    }
+
+                                                    closeTicket(selectedTicket, closed);
+                                                     
+                                                    System.out.println("");
+                                                    System.out.println("Ticket closed...");
+                                                    System.out.println("");
+
+                                                    break;
+
                                             }
-                                            /* 
-                                             * 
-                                             * key  C - closed      - can be reopened
-                                             *      A - archived    - cannot be reopened
-        
-                                             *      [2] close job
-                                             *          - Set closure status
-                                             *              [1] closed [resolved]
-                                             *              [2] close [unresolved]
-                                             *                  (update variables in ticket)
-                                             * 
-                                             */
 
                                             break;
+
                                         case(2):
 
+                                            System.out.println("=".repeat(50));
+                                            System.out.println("= Closed Job List =");
+                                            System.out.println("=".repeat(50));
 
                                             showTickets("closed");
+                                            System.out.println("-".repeat(50));
+                                            
+                                            int closedJobCount = countJobs("closed");
 
-                                            /* 
-                                             * key  C - closed      - can be reopened
-                                             *      A - archived    - cannot be reopened
-                                             * 
-                                             * select job to reopen
-                                             * input job number
-                                             * update/remove variables from job
-                                             * set job to tech who opened it
-                                             * 
-                                             * 
-                                             */
+                                            System.out.print("Job to re-open: ");
 
-                                            System.out.println("Reopen Job");
+                                            int reopenJobSelection = validateSelection(closedJobCount);
+
+                                            Ticket reopenTicket = showTicket("closed", reopenJobSelection);
+
+                                            reOpenTicket(reopenTicket);
+
+                                            System.out.println("");
+                                            System.out.println("Ticket reopened. It may be reallocated if it's severity level does not match your support level.");
+                                            System.out.println("");
+
                                             break;
                                     }
 
@@ -436,7 +478,44 @@ public class AirRMIT {
         return logout;     
         
     }
-    
+
+
+
+    private void closeTicket(Ticket selectedTicket, String closed) {
+
+        for (Ticket ticket: tickets) {
+            if (ticket.getCreatedBy().equals(selectedTicket.getCreatedBy()) && ticket.getOpenDateTime().equals(selectedTicket.getOpenDateTime())) {
+                ticket.setClosedDateTime(getCurrentDateTime());
+                ticket.setStatus(closed);
+            }
+        }
+    }
+
+        
+    private void reOpenTicket(Ticket ticket) {
+
+
+        for (Ticket t: tickets) {
+            if (t.getCreatedBy().equals(ticket.getCreatedBy()) && t.getOpenDateTime().equals(ticket.getOpenDateTime())) {
+                t.setStatus("open");
+                t.setClosedDateTime(null);
+                
+                if ((ticket.getSeverity().equals("High") && !loggedUser.getStaffType().equals("t2")) || 
+                    (!ticket.getSeverity().equals("High") && loggedUser.getStaffType().equals("t2"))) 
+                    {
+                        allocateTicket(t);
+                
+                } else {
+
+                    t.setAssignedTo(loggedUser.getEmail());
+
+                }      
+                
+            }
+        }
+    }
+
+
     private void updateTicket(Ticket ticket) {
         
         if (((ticket.getSeverity().equals("Low") || ticket.getSeverity().equals("Medium")) && loggedUser.getStaffType().equals("t2")) ||
@@ -445,6 +524,7 @@ public class AirRMIT {
                 ticket.setAssignedTo("");
 
                 allocateTicket(ticket);
+
             }
         
         for (Ticket t :tickets) {
@@ -457,15 +537,15 @@ public class AirRMIT {
 
     private Ticket showTicket(String string, int jobSelect) {
         
-        ArrayList<Ticket> tList = getTicketsList("open");
+        ArrayList<Ticket> tList = getTicketsList(string);
 
         return tList.get(jobSelect-1);
     }
 
 
-    private int countAssignedJobs(String string) {
+    private int countJobs(String string) {
         
-        return getTicketsList("open").size();
+        return getTicketsList(string).size();
 
     }
 
@@ -475,17 +555,34 @@ public class AirRMIT {
         ArrayList<Ticket> ticketsList = new ArrayList<Ticket>();
 
         for (Ticket ticket: tickets) {
-            if (loggedUser.getStaffType().equals("s")) {
-                if (ticket.getCreatedBy().equals(loggedUser.getEmail()) && ticket.getStatus().substring(0,4).equals(status.substring(0,4))) {
+
+            if (status.equals("open")) {
                 
-                    ticketsList.add(ticket);
+                if (loggedUser.getStaffType().equals("s")) {
+
+                    if (ticket.getCreatedBy().equals(loggedUser.getEmail()) && ticket.getStatus().equals(status)) {
+                
+                        ticketsList.add(ticket);
+                    }
+
+                } else {
+
+                    if (ticket.getAssignedTo().equals(loggedUser.getEmail()) && ticket.getStatus().equals(status)) {
+                
+                        ticketsList.add(ticket);
+                    }
                 }
+
             } else {
-                if (ticket.getAssignedTo().equals(loggedUser.getEmail()) && ticket.getStatus().substring(0,4).equals(status.substring(0,4))) {
                 
+                if (ticket.getStatus().substring(0,4).equals(status.substring(0,4))) {
+
                     ticketsList.add(ticket);
+
                 }
+
             }
+            
         }
         
         return ticketsList;
@@ -496,7 +593,7 @@ public class AirRMIT {
         System.out.println("-".repeat(50));
         System.out.println(status +" Tickets");
 
-        ArrayList<Ticket> tList = getTicketsList("open");
+        ArrayList<Ticket> tList = getTicketsList(status);
 
         if (tList.size() > 0 ) {
             
@@ -509,6 +606,9 @@ public class AirRMIT {
                 System.out.println("Severity: " + ticket.getSeverity());
                 if (loggedUser.getStaffType().charAt(0) == 't') {
                     System.out.println("Status: " + ticket.getStatus());
+                    if (!status.equals("open")) {
+                        System.out.println("Closed on: " + ticket.getClosedDateTime());
+                    }
                 } else {
                     System.out.println("Assigned to: " + getUserByEmail(ticket.getAssignedTo()));
                 }
@@ -559,9 +659,8 @@ public class AirRMIT {
             severity = "High";
         }
 
-        LocalDateTime current = LocalDateTime.now();
 
-        Ticket ticket = new Ticket(description, severity, formatDateTime(current), loggedUser.getEmail());
+        Ticket ticket = new Ticket(description, severity, getCurrentDateTime(), loggedUser.getEmail());
 
         allocateTicket(ticket);
         
@@ -571,11 +670,48 @@ public class AirRMIT {
     }
 
 
-    private String formatDateTime(LocalDateTime current) {
+    private String getCurrentDateTime() {
+
+        LocalDateTime now = LocalDateTime.now();
         
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
 
-        return current.format(format);
+        return now.format(format);
+    }
+
+    private void archiveTickets() {
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime check = null;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
+
+        Duration duration;
+
+        for (Ticket t: tickets) {
+
+            if (t.getStatus().charAt(0) == 'c') {
+
+            
+                try {
+
+                    check = LocalDateTime.parse(t.getClosedDateTime(), formatter);
+
+                    duration = Duration.between(check,now);
+
+                    if (duration.toHours() > 24) {
+                        t.setStatus("archived");
+                    }
+                    
+
+                } catch (DateTimeParseException e) {
+
+                    e.printStackTrace();
+
+                }
+            }
+        }
+
     }
 
 
@@ -597,7 +733,7 @@ public class AirRMIT {
             techs.add("liamp@airrmit.com");
         } else {
             techs.add("louist@airrmit.com");
-            techs.add("zaynm@airrmit.com");
+            techs.add("zaynem@airrmit.com");
         }
 
         ArrayList<Integer> count = new ArrayList<Integer>();

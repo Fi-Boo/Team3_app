@@ -54,7 +54,7 @@ public class Ticket {
         return this.openDateTime;
     }
 
-    public String getclosedDateTime() {
+    public String getClosedDateTime() {
         return this.closedDateTime;
     }
 
