@@ -5,15 +5,17 @@ public class Ticket {
     String status;
     String createdBy;
     String assignedTo;
-    String ClosureDateTime;
+    String openDateTime;
+    String closedDateTime;
     
-    public Ticket(String description, String severity, String createdBy) {
+    public Ticket(String description, String severity, String openDateTime, String createdBy) {
         super();
         this.description = description;
         this.severity = severity;
         this.createdBy = createdBy;
         this.status = "open";
-        this.ClosureDateTime = null;
+        this.openDateTime = openDateTime;
+        this.closedDateTime = null;
     }
 
     public String getDescription() {
@@ -47,5 +49,19 @@ public class Ticket {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public String getOpenDateTime() {
+        return this.openDateTime;
+    }
+
+    public String getclosedDateTime() {
+        return this.closedDateTime;
+    }
+
+    public void setClosedDateTime(String closedDateTime) {
+        this.closedDateTime = closedDateTime;
+    }
+
+
 
 }
