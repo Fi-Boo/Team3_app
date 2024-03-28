@@ -26,13 +26,13 @@ public class User {
         this.staffType = "s";
     }
 
-    public User(String email, String fullName, String phoneNumber, String password, String letter) {
+    public User(String email, String fullName, String phoneNumber, String password, String staffType) {
         super();
         this.email = email;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.password = password;
-        this.staffType = letter;
+        this.staffType = staffType;
     }
 
     public String getEmail() {
