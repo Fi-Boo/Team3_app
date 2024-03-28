@@ -60,7 +60,7 @@ public class AirRMIT {
             switch (userInput) {
                 case (1):
 
-                    System.out.println("registration menu!");
+                    runRegistrationFeature();
 
                     break;
                 case (2):
@@ -78,6 +78,85 @@ public class AirRMIT {
             }
 
         } while (userInput != 4);
+    }
+
+    private void runRegistrationFeature() {
+
+        // for testing purposes I set at 5. Change to 20 for final submission
+        String passwordLength = "5";
+
+        showHeaderOne("Registration Menu");
+        System.out.println("");
+
+        boolean emailExists = true;
+
+        String email;
+
+        do {
+
+            String emailRegex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+                    + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+            String emailErrorMessage = "Invalid email format. Please try again...";
+            email = validateRegex("Email: ", emailRegex, emailErrorMessage);
+
+            emailExists = checkEmail(email);
+
+            if (emailExists == true) {
+
+                System.out.println("There is an account already associated with this email. Try again buddy...");
+
+            }
+
+        } while (emailExists == true);
+
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{" + passwordLength + ",}$";
+        String passwordErrorMessage = "Invalid password format. At least 1 upper case, 1 lower case, 1 number. Min length "
+                + passwordLength + " characters. Please try again...";
+        String password = validateRegex("Password: ", passwordRegex, passwordErrorMessage);
+
+        String nameRegex = "^[A-Z][a-z]*(?: [A-Z][a-z]*)+$";
+        String nameErrorMessage = "Full ame cannot be blank. Must begin with an Upper case letter and have a space between first name and surname. Please try again...";
+        String fullName = validateRegex("Full Name: ", nameRegex, nameErrorMessage);
+
+        String phoneRegex = "^(0)[1-9](?:[0-9]{8}|(?:\\s[0-9]{3,4}){3})$";
+        String numberErrorMessage = "Invalid AUS mobile number. Must be in format 04xxxxxxxx. Please try again...";
+        String contact = validateRegex("Mobile contact: ", phoneRegex, numberErrorMessage);
+
+        User newUser = new User(email, fullName, contact, password);
+
+        users.add(newUser);
+
+        System.out.println("\nUser registration successful.");
+        System.out.println("Returning to Service Portal\n");
+    }
+
+    private boolean checkEmail(String email) {
+
+        for (User user : users) {
+            if (user.getEmail().equalsIgnoreCase(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String validateRegex(String title, String regex, String errorMsg) {
+
+        Pattern pattern = Pattern.compile(regex);
+        String userInput;
+        boolean matchFound = false;
+
+        do {
+            System.out.print(title);
+            userInput = sc.nextLine();
+            Matcher matcher = pattern.matcher(userInput);
+            matchFound = matcher.find();
+            if (matchFound == false) {
+                System.out.println(errorMsg);
+            }
+        } while (matchFound == false);
+
+        return userInput;
     }
 
     private int validateUserSelection(int i) {
@@ -116,6 +195,7 @@ public class AirRMIT {
 
     private void showHeaderOne(String title) {
 
+        System.out.println("");
         System.out.println("*".repeat(50));
         System.out.println(name + " " + title);
         System.out.println("*".repeat(50));
