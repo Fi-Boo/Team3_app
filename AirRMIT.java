@@ -65,7 +65,8 @@ public class AirRMIT {
                     break;
                 case (2):
 
-                    System.out.println("Existing Login Menu");
+                    // NEEDS TO BE WORKED ON NEXT
+                    runLoginFeature();
 
                     break;
                 case (3):
@@ -78,6 +79,20 @@ public class AirRMIT {
             }
 
         } while (userInput != 4);
+    }
+
+    private void runLoginFeature() {
+
+        showHeaderOne("User Login Menu");
+        System.out.println("\nInput Credentials");
+        System.out.print("Email: ");
+        String email = sc.nextLine();
+        System.out.print("Password: ");
+        String password = sc.nextLine();
+
+        // credential validation function needs to be done
+        System.out.println(email + " " + password + "needs to be checked");
+
     }
 
     private void runRegistrationFeature() {
@@ -125,6 +140,7 @@ public class AirRMIT {
         User newUser = new User(email, fullName, contact, password);
 
         users.add(newUser);
+        loggedUser = newUser;
 
         System.out.println("\nUser registration successful.");
         System.out.println("Returning to Service Portal\n");
@@ -133,7 +149,9 @@ public class AirRMIT {
     private boolean checkEmail(String email) {
 
         for (User user : users) {
+
             if (user.getEmail().equalsIgnoreCase(email)) {
+
                 return true;
             }
         }
