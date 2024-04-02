@@ -30,6 +30,9 @@ public class AirRMIT {
 
     Scanner sc = new Scanner(System.in);
 
+    // for testing purposes I set at 5. Change to 20 for final submission
+    String passwordLength = "5";
+
     public void run() {
 
         loadHardCodedUsers(); // hardcoded staff data. May change to loading from a csv for easy data
@@ -61,7 +64,8 @@ public class AirRMIT {
                     break;
                 case (3):
 
-                    System.out.println("Reset Password");
+                    runPasswordResetFeature();
+
                     break;
                 case (4):
                     System.out.println("Exiting System...");
@@ -89,9 +93,6 @@ public class AirRMIT {
      * 
      */
     private void runRegistrationFeature() {
-
-        // for testing purposes I set at 5. Change to 20 for final submission
-        String passwordLength = "5";
 
         showHeaderOne("Registration Menu");
         System.out.println("");
@@ -187,6 +188,71 @@ public class AirRMIT {
 
             runStaffInterface();
         }
+
+    }
+
+    /*
+     * Password Reset Feature
+     * 
+     * Checks user input email and contact for an match in the users collection.
+     * 3 Attempts ONLY. Failing the 3rd attempt will return to the Service Portal
+     * menu.
+     * 
+     * If match found, user is prompted to input a new password. Password must
+     * conform to regex
+     * requirements.
+     * 
+     * Returns user to Service Portal once complete.
+     */
+    private void runPasswordResetFeature() {
+
+        showHeaderOne("Forgot Password?");
+        System.out.println("\nPlease input the following credentials to reset your password");
+
+        boolean validCreds = false, failCheck = false;
+
+        int checkAttempts = 3;
+
+        do {
+
+            System.out.print("Email: ");
+            String email = sc.nextLine();
+            System.out.print("Contact Number: ");
+            String number = sc.nextLine();
+
+            for (User user : users) {
+
+                if (user.getEmail().equalsIgnoreCase(email) && user.getNumber().equals(number)) {
+                    validCreds = true;
+
+                    System.out.println("\nMatch found! Input new password...");
+
+                    String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{" + passwordLength + ",}$";
+                    String passwordErrorMessage = "Invalid password format. At least 1 upper case, 1 lower case, 1 number. Min length "
+                            + passwordLength + " characters. Please try again...";
+                    String password = validateRegex("Password: ", passwordRegex, passwordErrorMessage);
+
+                    user.setPassword(password);
+
+                    System.out.println("Password reset successful! Returning to Service Portal...");
+
+                }
+            }
+
+            if (validCreds == false) {
+
+                checkAttempts--;
+                System.out.printf("No match found. %d attempts remaining...\n", checkAttempts);
+
+                if (checkAttempts == 0) {
+
+                    failCheck = true;
+                    System.out.println("\nReturning to Service Portal...");
+                }
+
+            }
+
+        } while (validCreds == false && failCheck == false);
 
     }
 
