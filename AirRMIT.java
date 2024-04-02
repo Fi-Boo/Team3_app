@@ -28,13 +28,13 @@ public class AirRMIT {
 
     private String name;
     private ArrayList<User> users;
-    private ArrayList<Ticket> tickets;
+    // private ArrayList<Ticket> tickets; added but currently not used.
     private User loggedUser;
 
     public AirRMIT(String string) {
         this.name = string;
         this.users = new ArrayList<User>();
-        this.tickets = new ArrayList<Ticket>();
+        // this.tickets = new ArrayList<Ticket>();
         this.loggedUser = null;
     }
 
@@ -42,7 +42,8 @@ public class AirRMIT {
 
     public void run() {
 
-        loadHardCodedUsers();
+        loadHardCodedUsers(); // hardcoded staff data. May change to loading from a csv for easy data
+                              // manipulation during testing
 
         int userInput;
 
@@ -65,7 +66,6 @@ public class AirRMIT {
                     break;
                 case (2):
 
-                    // NEEDS TO BE WORKED ON NEXT
                     runLoginFeature();
 
                     break;
@@ -81,20 +81,23 @@ public class AirRMIT {
         } while (userInput != 4);
     }
 
-    private void runLoginFeature() {
-
-        showHeaderOne("User Login Menu");
-        System.out.println("\nInput Credentials");
-        System.out.print("Email: ");
-        String email = sc.nextLine();
-        System.out.print("Password: ");
-        String password = sc.nextLine();
-
-        // credential validation function needs to be done
-        System.out.println(email + " " + password + "needs to be checked");
-
-    }
-
+    /*
+     * Registration Feature
+     *
+     * Validate user inputs against regex
+     * Emails - must be in the form user@domain.name
+     * Full Name - first character for first name and surname must be upper case.
+     * Must be more than 2 characters long. Must have a first name and surname.
+     * hyphen allowed.
+     * Password - 20 alphanumerical characters long. At least 1 number, 1 upper
+     * case, 1 lower case.
+     * 
+     * Check registration email against existing accounts.
+     * 
+     * Successful registration will add the user to the collection of users and
+     * return to the Service Portal menu.
+     * 
+     */
     private void runRegistrationFeature() {
 
         // for testing purposes I set at 5. Change to 20 for final submission
@@ -140,12 +143,138 @@ public class AirRMIT {
         User newUser = new User(email, fullName, contact, password);
 
         users.add(newUser);
-        loggedUser = newUser;
 
         System.out.println("\nUser registration successful.");
         System.out.println("Returning to Service Portal\n");
     }
 
+    /*
+     * Login Feature
+     * 
+     * Validate input credentials (email & password) against existing users list.
+     * 3 login attempt limit. Upon failing the 3rd attempt, the system will return
+     * to the Service Portal menu.
+     * 
+     * Successful credentials validation will proceed to the staff interface.
+     * 
+     */
+    private void runLoginFeature() {
+
+        showHeaderOne("User Login Menu");
+        System.out.println("\nInput Credentials");
+
+        boolean validCreds = false;
+        boolean failLogin = false;
+
+        int loginAttempts = 3;
+
+        do {
+
+            System.out.print("Email: ");
+            String email = sc.nextLine();
+            System.out.print("Password: ");
+            String password = sc.nextLine();
+            validCreds = validateCredentials(email, password);
+
+            if (validCreds == false) {
+
+                loginAttempts--;
+
+                System.out.printf("\nInvalid login. %d attempts remaining...\n", loginAttempts);
+
+                if (loginAttempts == 0) {
+
+                    System.out.println("Returning to Service Portal...");
+                    failLogin = true;
+
+                }
+
+            }
+
+        } while (validCreds == false && failLogin == false);
+
+        if (validCreds == true) {
+
+            runStaffInterface();
+        }
+
+    }
+
+    /*
+     * Staff Interface
+     * 
+     * Currently the only available feature is the LOG OUT. Logs out user and
+     * returns to the Service Portal menu.
+     * 
+     * 
+     * FUTURE WORKS
+     * 
+     * Staff Type specific menu
+     * 
+     */
+    private void runStaffInterface() {
+
+        int selection;
+
+        do {
+
+            showHeaderOne("Staff Interface");
+            System.out.println(loggedUser.getFullName());
+            System.out.println("Clearance: [" + loggedUser.getStaffType().toUpperCase() + "]\n");
+
+            System.out.println("------");
+            System.out.println("Open Tickets");
+            System.out.println(" Coming Soon");
+            System.out.println("------");
+
+            System.out.println("\nStaff Menu");
+            System.out.println("[x] Coming soon");
+            System.out.println("[x] Coming soon");
+            System.out.println("[1] Log out");
+            System.out.print("Selection: ");
+
+            selection = validateUserSelection(1);
+
+            switch (selection) {
+                case (1):
+                    System.out.println("\nLogging out and returning to Service Portal..");
+                    break;
+            }
+
+        } while (selection != 1);
+
+    }
+
+    /*
+     * Credential validation.
+     * 
+     * Takes user input strings for email and password and checks for a match in the
+     * users collection.
+     * 
+     * Returns a boolean if a match for both email and password is found for the
+     * same user.
+     */
+    private boolean validateCredentials(String email, String password) {
+
+        for (User user : users) {
+
+            if (user.getEmail().equalsIgnoreCase(email) && user.getPassword().equals(password)) {
+
+                loggedUser = user;
+
+                return true;
+
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Takes user input String for email and checks for a match in the users
+     * collection.
+     * 
+     * Returns a boolean based on a match or not.
+     */
     private boolean checkEmail(String email) {
 
         for (User user : users) {
@@ -158,6 +287,15 @@ public class AirRMIT {
         return false;
     }
 
+    /*
+     * Validates by Regex function
+     * 
+     * Takes a user input String and validates it against a predefined regex
+     * pattern. Outputs predefined error message if a match is not found.
+     * Will continue to ask for user input if it fails to pass the validation.
+     * 
+     * Returns the user input string if it passes regex validation.
+     */
     private String validateRegex(String title, String regex, String errorMsg) {
 
         Pattern pattern = Pattern.compile(regex);
@@ -177,6 +315,14 @@ public class AirRMIT {
         return userInput;
     }
 
+    /*
+     * User selection validation
+     * 
+     * Takes a user input value and checks that it is within a predefined int
+     * boundary.
+     * 
+     * Returns the user input value only once a valid input is achieved.
+     */
     private int validateUserSelection(int i) {
 
         int userInput = 0;
@@ -211,6 +357,12 @@ public class AirRMIT {
         return userInput;
     }
 
+    /*
+     * Utility function to reduce code repetition
+     * 
+     * generates a basic top and bottom border around a title String based on the
+     * paramater.
+     */
     private void showHeaderOne(String title) {
 
         System.out.println("");
@@ -219,6 +371,13 @@ public class AirRMIT {
         System.out.println("*".repeat(50));
     }
 
+    /*
+     * Function to populate the users collection with staff Users
+     * 
+     * T1 and T2 staff as per client requirement.
+     * 
+     * Team member staff also added for testing purposes
+     */
     private void loadHardCodedUsers() {
 
         users.add(new User("harrys@airrmit.com", "Harry Styles", "0430303030", "iamharry",
