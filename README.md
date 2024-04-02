@@ -26,12 +26,12 @@ You have access to the *.java files and a working RMIT login.
 
 2.6.  Select your RMIT email drive (H: It should begin with your student number)
 
-2.7.  Right click on the drive > NEW > New Folder (can name it whatever you want)
+2.7.  Create a new folder to store the java files. This is done by right clicking on the drive > NEW > New Folder (can name it whatever you want)
 
 2.8.  Click OK
         ~ The files have now been uploaded to the 'New Folder' (or whatever you have named it)
 
-2.9.  Click on the Window Icon in the bottom left corner. 
+2.9.  Click on the Window Icon in the bottom left corner of the virtual desktop in the browser. !!NOT YOUR DESKTOP!! 
 
 2.10. In the pop up list of applications, scroll down to E and open Eclipse IDE
 
@@ -45,7 +45,7 @@ Eclipse IDE should launch.
   
 3.2.  In the left bar, select your student drive (H:\)
 
-3.3.  In the middle box, select the folder where the *.java files were uploaded. 
+3.3.  In the middle box, select the folder where the *.java files were uploaded to. 
 
 3.4.  At the bottom right, select FINISH.
 
