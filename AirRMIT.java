@@ -405,7 +405,7 @@ public class AirRMIT {
 
             } catch (NumberFormatException e) {
 
-                System.out.print("Invalid selection. Use a number dumbass! Try again: ");
+                System.out.print("Invalid selection. Use a number! Try again: ");
             }
 
         } while (validInput == false);
