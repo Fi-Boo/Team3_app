@@ -18,7 +18,7 @@ public class Ticket {
     String assignedTo;
     String openDateTime;
     String closedDateTime;
-    
+
     public Ticket(String description, String severity, String openDateTime, String createdBy) {
         super();
         this.description = description;
@@ -27,6 +27,11 @@ public class Ticket {
         this.status = "open";
         this.openDateTime = openDateTime;
         this.closedDateTime = null;
+    }
+
+    public Ticket(String description, String severity, String string3, String string4, String string5, String string6,
+            String string7) {
+        // TODO Auto-generated constructor stub
     }
 
     public String getDescription() {
@@ -72,7 +77,5 @@ public class Ticket {
     public void setClosedDateTime(String closedDateTime) {
         this.closedDateTime = closedDateTime;
     }
-
-
 
 }

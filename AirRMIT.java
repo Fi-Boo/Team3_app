@@ -12,19 +12,23 @@
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class AirRMIT {
 
     private String name;
     private ArrayList<User> users;
-    // private ArrayList<Ticket> tickets; added but currently not used.
+    private ArrayList<Ticket> tickets;
     private User loggedUser;
 
     public AirRMIT(String string) {
         this.name = string;
         this.users = new ArrayList<User>();
-        // this.tickets = new ArrayList<Ticket>();
+        this.tickets = new ArrayList<Ticket>();
         this.loggedUser = null;
     }
 
@@ -37,6 +41,8 @@ public class AirRMIT {
 
         loadHardCodedUsers(); // hardcoded staff data. May change to loading from a csv for easy data
                               // manipulation during testing
+
+        loadData(); // used to load dummy data for testing.
 
         int userInput;
 
@@ -453,6 +459,57 @@ public class AirRMIT {
         users.add(new User("nickd@airrmit.com", "Nick Drinkwater", "0433508178",
                 "iamnick"));
         users.add(new User("phib@airrmit.com", "Phi Bui", "0432008156", "iamphi"));
+
+    }
+
+    private void loadData() {
+
+        try {
+
+            BufferedReader br = new BufferedReader(new FileReader("data.txt"));
+
+            String line = br.readLine();
+
+            while ((line = br.readLine()) != null) {
+
+                String[] row = line.split("\t");
+
+                tickets.add(new Ticket(row[0], row[1], row[2], row[3], row[4], row[5], row[6]));
+
+            }
+
+            br.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("data load successful...");
+
+    }
+
+    public void saveData() {
+
+        StringBuilder content = new StringBuilder();
+
+        content.append("Description\tSeverity\tOpen Date/Time\tCreated By\tAssigned To\tStatus\tClosed Date/Time\n");
+
+        for (Ticket ticket : tickets) {
+            content.append(ticket.toString());
+        }
+
+        FileWriter filewriter = null;
+
+        try {
+
+            filewriter = new FileWriter("data.txt", false);
+            filewriter.write(content.toString());
+
+            filewriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
