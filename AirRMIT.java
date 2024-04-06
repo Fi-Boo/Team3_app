@@ -181,7 +181,7 @@ public class AirRMIT {
 
                 if (loginAttempts == 0) {
 
-                    System.out.println("Returning to Service Portal...");
+                    System.out.println("\nReturning to Service Portal...");
                     failLogin = true;
 
                 }
@@ -276,7 +276,7 @@ public class AirRMIT {
      */
     private void runStaffInterface() {
 
-        int selection;
+        boolean logout = false;
 
         do {
 
@@ -284,27 +284,107 @@ public class AirRMIT {
             System.out.println(loggedUser.getFullName());
             System.out.println("Clearance: [" + loggedUser.getStaffType().toUpperCase() + "]\n");
 
-            System.out.println("------");
-            System.out.println("Open Tickets");
-            System.out.println(" Coming Soon");
-            System.out.println("------");
+            showTickets("Open");
 
-            System.out.println("\nStaff Menu");
-            System.out.println("[x] Coming soon");
-            System.out.println("[x] Coming soon");
-            System.out.println("[1] Log out");
-            System.out.print("Selection: ");
+            if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")) {
 
-            selection = validateUserSelection(1);
+                showTickets("Closed");
+                showTickets("Archived");
+            }
 
-            switch (selection) {
+            if (loggedUser.getStaffType().equalsIgnoreCase("s")) {
+
+                logout = runStaffMenu();
+
+            } else {
+
+                logout = runTechMenu();
+            }
+
+        } while (logout != true);
+
+    }
+
+    private void showTickets(String status) {
+
+        showHeaderTwo(status + " Tickets");
+
+        ArrayList<Ticket> tList = getTicketsListByStatus(status);
+
+        int counter = 0;
+
+        if (tList.size() == 0) {
+
+            System.out.println("No " + status + "Tickets...");
+
+        } else {
+
+            for (Ticket ticket : tList) {
+                counter++;
+                System.out.println("Ticket #" + counter);
+                ticket.toString();
+            }
+        }
+    }
+
+    private ArrayList<Ticket> getTicketsListByStatus(String status) {
+
+        ArrayList<Ticket> list = new ArrayList<Ticket>();
+
+        for (Ticket ticket : tickets) {
+
+            if (status.equalsIgnoreCase("open") && ticket.getStatus().equalsIgnoreCase(status)) {
+
+                if (loggedUser.getStaffType().equalsIgnoreCase("s")
+                        && ticket.getCreatedBy().equals(loggedUser.getFullName())) {
+
+                    list.add(ticket);
+
+                } else if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")
+                        && ticket.getAssignedTo().equals(loggedUser.getFullName())) {
+
+                    list.add(ticket);
+                }
+            } else if (!status.equalsIgnoreCase("open")
+                    && ticket.getStatus().substring(0, 1).equalsIgnoreCase(status.substring(0, 1))) {
+
+                list.add(ticket);
+
+            }
+        }
+
+        return list;
+    }
+
+    private boolean runStaffMenu() {
+
+        int staffSelection;
+        boolean logout = false;
+
+        do {
+            showHeaderTwo("Staff Menu");
+            System.out.println("[1] Open Ticket");
+            System.out.println("[2] Log out");
+            staffSelection = validateUserSelection(2);
+
+            switch (staffSelection) {
                 case (1):
-                    System.out.println("\nLogging out and returning to Service Portal..");
+                    System.out.println("New Ticket Menu coming soon");
+                    break;
+                case (2):
+                    System.out.println("Logging out and returning to Service Portal");
+                    logout = true;
                     break;
             }
 
-        } while (selection != 1);
+        } while (logout == false);
 
+        return logout;
+    }
+
+    private boolean runTechMenu() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'runTechMenu'");
     }
 
     /*
@@ -431,6 +511,15 @@ public class AirRMIT {
         System.out.println("*".repeat(50));
         System.out.println(name + " " + title);
         System.out.println("*".repeat(50));
+    }
+
+    private void showHeaderTwo(String title) {
+
+        System.out.println("");
+        System.out.println("-".repeat(50));
+        System.out.println(title);
+        System.out.println("-".repeat(50));
+
     }
 
     /*

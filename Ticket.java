@@ -87,4 +87,18 @@ public class Ticket {
         this.closedDateTime = closedDateTime;
     }
 
+    @Override
+    public String toString() {
+
+        String separator = "\t";
+
+        return this.description + separator +
+                this.severity + separator +
+                this.openDateTime + separator +
+                this.createdBy + separator +
+                this.assignedTo + separator +
+                this.status + separator +
+                this.closedDateTime + "\n";
+    }
+
 }
