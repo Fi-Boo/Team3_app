@@ -1,0 +1,3 @@
+Description	Severity	Open Date/Time	Created By	Assigned To	Status	Closed Date/Time
+this is a low level ticket	Low	06/04/24 08:55:35	Phi Bui	Harry Styles	open	null
+this is a med level ticket	Medium	06/04/24 08:55:44	Phi Bui	Niall Horan	open	null
