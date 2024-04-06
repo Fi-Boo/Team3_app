@@ -29,9 +29,18 @@ public class Ticket {
         this.closedDateTime = null;
     }
 
-    public Ticket(String description, String severity, String string3, String string4, String string5, String string6,
-            String string7) {
-        // TODO Auto-generated constructor stub
+    public Ticket(String description, String severity, String openDateTime, String createdBy, String assignedTo,
+            String status, String closedDateTime) {
+
+        super();
+        this.description = description;
+        this.severity = severity;
+        this.createdBy = createdBy;
+        this.assignedTo = assignedTo;
+        this.status = status;
+        this.openDateTime = openDateTime;
+        this.closedDateTime = closedDateTime;
+
     }
 
     public String getDescription() {
