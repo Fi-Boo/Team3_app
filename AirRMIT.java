@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class AirRMIT {
 
@@ -307,167 +308,6 @@ public class AirRMIT {
 
     }
 
-    private void showTickets(String status) {
-
-        showHeaderTwo(status + " Tickets");
-
-        ArrayList<Ticket> tList = getTicketsListByStatus(status);
-
-        int counter = 0;
-
-        if (tList.size() == 0) {
-
-            System.out.println("No " + status + " Tickets...");
-
-        } else {
-
-            for (Ticket ticket : tList) {
-                counter++;
-
-                System.out.printf("\nTicket #%d", counter);
-                System.out.printf("\n%-16s: %s", "Open Date/Time", ticket.getOpenDateTime());
-                System.out.printf("\n%-16s: %s", "Severity", ticket.getSeverity());
-                System.out.printf("\n%-16s: %s", "Description", ticket.getDescription());
-
-                if (loggedUser.getStaffType().equalsIgnoreCase("s")) {
-
-                    System.out.printf("\n%-16s: %s\n", "Assigned To", ticket.getAssignedTo());
-
-                } else {
-
-                    System.out.printf("\n%-16s: %s\n", "Created By", ticket.getCreatedBy());
-
-                    if (!ticket.getStatus().substring(0, 1).equalsIgnoreCase("o")) {
-
-                        System.out.printf("\n%-16s: %s\n", "Closed Date/Time", ticket.getClosedDateTime());
-                    }
-                }
-
-                System.out.println("-".repeat(50));
-
-            }
-        }
-    }
-
-    private ArrayList<Ticket> getTicketsListByStatus(String status) {
-
-        ArrayList<Ticket> list = new ArrayList<Ticket>();
-
-        for (Ticket ticket : tickets) {
-
-            if (status.equalsIgnoreCase("open") && ticket.getStatus().equalsIgnoreCase(status)) {
-
-                if (loggedUser.getStaffType().equalsIgnoreCase("s")
-                        && ticket.getCreatedBy().equals(loggedUser.getFullName())) {
-
-                    list.add(ticket);
-
-                } else if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")
-                        && ticket.getAssignedTo().equals(loggedUser.getFullName())) {
-
-                    list.add(ticket);
-                }
-            } else if (!status.equalsIgnoreCase("open")
-                    && ticket.getStatus().substring(0, 1).equalsIgnoreCase(status.substring(0, 1))) {
-
-                list.add(ticket);
-
-            }
-        }
-
-        return list;
-    }
-
-    private boolean runStaffMenu() {
-
-        int staffSelection;
-        boolean logout = false;
-
-        do {
-            showHeaderTwo("Staff Menu");
-            System.out.println("[1] Open Ticket");
-            System.out.println("[2] Log out");
-            System.out.print("Selection: ");
-            staffSelection = validateUserSelection(2);
-
-            switch (staffSelection) {
-                case (1):
-
-                    openTicket();
-                    break;
-                case (2):
-
-                    System.out.println("\nLogging out and returning to Service Portal...");
-                    loggedUser = null;
-                    logout = true;
-                    break;
-            }
-
-        } while (logout == false);
-
-        return logout;
-    }
-
-    private void openTicket() {
-
-        showHeaderTwo("Open New Ticket");
-        System.out.println("**Fields cannot be blank**\n");
-
-        String description, severity;
-
-        do {
-
-            System.out.print("Description: ");
-            description = sc.nextLine();
-            if (description.isBlank()) {
-                System.out.println("Field cannot be left blank....");
-            }
-
-        } while (description.isBlank());
-
-        System.out.println("Severity ");
-        System.out.println("[1] Low");
-        System.out.println("[2] Medium");
-        System.out.println("[3] High");
-        int selection = validateUserSelection(3);
-
-        if (selection == 1) {
-
-            severity = "Low";
-        } else if (selection == 2) {
-
-            severity = "Medium";
-        } else {
-
-            severity = "High";
-        }
-
-        String openDateTime = getDateTime();
-
-        String allocatedStaff = getAllocatedStaff();
-
-    }
-
-    private String getAllocatedStaff() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllocatedStaff'");
-    }
-
-    private String getDateTime() {
-
-        LocalDateTime now = LocalDateTime.now();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
-
-        return now.format(formatter);
-
-    }
-
-    private boolean runTechMenu() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'runTechMenu'");
-    }
-
     /*
      * Credential validation.
      * 
@@ -632,6 +472,15 @@ public class AirRMIT {
 
     }
 
+    // SPRINT 2 ADDITIONS
+
+    /*
+     * function to load data from hardcoded data.txt
+     * 
+     * Assumption - data in each datafield is correct.
+     * - no data validation implemented (out of scope)
+     * 
+     */
     private void loadData() {
 
         try {
@@ -658,6 +507,11 @@ public class AirRMIT {
 
     }
 
+    /*
+     * function to save Ticket data to file data.txt
+     * used for testing purposes
+     * 
+     */
     public void saveData() {
 
         StringBuilder content = new StringBuilder();
@@ -681,6 +535,285 @@ public class AirRMIT {
             e.printStackTrace();
         }
 
+    }
+
+    /*
+     * outputs ticket data in a particular format based on certain conditions.
+     * 
+     * conditions - If Staff logged in, shows only staff member's open ticket
+     * - If Tech logged in, shows only tech's open tickets
+     * - If Tech logged in, shows all closed/archived tickets
+     */
+    private void showTickets(String status) {
+
+        showHeaderTwo(status + " Tickets");
+
+        ArrayList<Ticket> tList = getTicketsListByStatus(status);
+
+        int counter = 0;
+
+        if (tList.size() == 0) {
+
+            System.out.println("No " + status + " Tickets...");
+
+        } else {
+
+            for (Ticket ticket : tList) {
+                counter++;
+
+                System.out.printf("\nTicket #%d", counter);
+                System.out.printf("\n%-16s: %s", "Open Date/Time", ticket.getOpenDateTime());
+                System.out.printf("\n%-16s: %s", "Severity", ticket.getSeverity());
+                System.out.printf("\n%-16s: %s", "Description", ticket.getDescription());
+
+                if (loggedUser.getStaffType().equalsIgnoreCase("s")) {
+
+                    System.out.printf("\n%-16s: %s\n", "Assigned To", ticket.getAssignedTo());
+
+                } else {
+
+                    System.out.printf("\n%-16s: %s\n", "Created By", ticket.getCreatedBy());
+
+                    if (!ticket.getStatus().substring(0, 1).equalsIgnoreCase("o")) {
+
+                        System.out.printf("\n%-16s: %s\n", "Closed Date/Time", ticket.getClosedDateTime());
+                    }
+                }
+
+                System.out.println("-".repeat(50));
+
+            }
+        }
+    }
+
+    /*
+     * Gets collection of tickets based on input parameter
+     * 
+     * Conditions - If open parameter, returns all open tickets allocated to logged
+     * in user
+     * - If closed/archived ticket, returns all closed/archived tickets
+     * 
+     */
+    private ArrayList<Ticket> getTicketsListByStatus(String status) {
+
+        ArrayList<Ticket> list = new ArrayList<Ticket>();
+
+        for (Ticket ticket : tickets) {
+
+            if (status.equalsIgnoreCase("open") && ticket.getStatus().equalsIgnoreCase(status)) {
+
+                if (loggedUser.getStaffType().equalsIgnoreCase("s")
+                        && ticket.getCreatedBy().equals(loggedUser.getFullName())) {
+
+                    list.add(ticket);
+
+                } else if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")
+                        && ticket.getAssignedTo().equals(loggedUser.getFullName())) {
+
+                    list.add(ticket);
+                }
+            } else if (!status.equalsIgnoreCase("open")
+                    && ticket.getStatus().substring(0, 1).equalsIgnoreCase(status.substring(0, 1))) {
+
+                list.add(ticket);
+
+            }
+        }
+
+        return list;
+    }
+
+    /*
+     * function that runs the Staff menu
+     * 
+     * Allows a staff to open a new ticket or log out
+     * 
+     */
+    private boolean runStaffMenu() {
+
+        int staffSelection;
+        boolean logout = false;
+
+        do {
+            showHeaderTwo("Staff Menu");
+            System.out.println("[1] Open Ticket");
+            System.out.println("[2] Log out");
+            System.out.print("Selection: ");
+            staffSelection = validateUserSelection(2);
+
+            switch (staffSelection) {
+                case (1):
+
+                    openTicket();
+                    showTickets("Open");
+                    break;
+                case (2):
+
+                    System.out.println("\nLogging out and returning to Service Portal...");
+                    loggedUser = null;
+                    logout = true;
+                    break;
+            }
+
+        } while (logout == false);
+
+        return logout;
+    }
+
+    /*
+     * Open new ticket function
+     * 
+     * Takes user data input and creates a new ticket
+     * Fields - description - user input (cannot be blank)
+     * - severity - user selection from available options
+     */
+    private void openTicket() {
+
+        showHeaderTwo("Open New Ticket");
+        System.out.println("**Fields cannot be blank**\n");
+
+        String description, severity;
+
+        do {
+
+            System.out.println("= Description = ");
+            description = sc.nextLine();
+            if (description.isBlank()) {
+                System.out.println("Field cannot be left blank....");
+            }
+
+        } while (description.isBlank());
+
+        System.out.println("= Severity =");
+        System.out.println("[1] Low");
+        System.out.println("[2] Medium");
+        System.out.println("[3] High");
+        int selection = validateUserSelection(3);
+
+        if (selection == 1) {
+
+            severity = "Low";
+        } else if (selection == 2) {
+
+            severity = "Medium";
+        } else {
+
+            severity = "High";
+        }
+
+        String openDateTime = getDateTime();
+
+        String assignedTech = generateAssignedTech(severity);
+
+        tickets.add(
+                new Ticket(description, severity, openDateTime, loggedUser.getFullName(), assignedTech, "Open", null));
+
+        saveData();
+
+        System.out.println("\nNew Ticket opened and assigned...\n");
+
+    }
+
+    /*
+     * function that allocates a tech staff based on their tech level, how many
+     * current jobs they have and the ticket severity level
+     * 
+     * Returns the tech that matches the severity level, and has the least open
+     * tickets
+     * 
+     */
+    private String generateAssignedTech(String severity) {
+
+        ArrayList<String> techs = new ArrayList<String>();
+
+        if (severity == "Low" || severity == "Medium") {
+            techs.add("Harry Styles");
+            techs.add("Niall Horan");
+            techs.add("Liam Payne");
+        } else {
+            techs.add("Louis Tomlinson");
+            techs.add("Zayne Malik");
+        }
+
+        ArrayList<Integer> count = new ArrayList<Integer>();
+
+        // calculations to determine who to get the task.
+        for (String tech : techs) {
+            int counter = 0;
+            for (Ticket ticket : tickets) {
+                if (ticket.getAssignedTo().equals(tech)) {
+                    counter++;
+                }
+            }
+            count.add(counter);
+        }
+
+        int lowest = count.indexOf(Collections.min(count));
+        String allocatedTech = techs.get(lowest);
+
+        return allocatedTech;
+
+    }
+
+    /*
+     * function that gets the current Date and Time in a String
+     * 
+     * return String is in format dd/MM/yy HH:mm:ss
+     * 
+     */
+    private String getDateTime() {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
+
+        String formattedDateTime = now.format(formatter);
+
+        return formattedDateTime;
+
+    }
+
+    /*
+     * function that runs the Technician menu
+     * 
+     * Allows a tech to open a edit/close a ticket, re-open a ticket or log out.
+     * 
+     */
+    private boolean runTechMenu() {
+
+        int staffSelection;
+        boolean logout = false;
+
+        do {
+            showHeaderTwo("Technician Menu");
+            System.out.println("[1] Edit/Close Ticket");
+            System.out.println("[2] Re-open Ticket");
+            System.out.println("[3] Log out");
+            System.out.print("Selection: ");
+            staffSelection = validateUserSelection(3);
+
+            switch (staffSelection) {
+                case (1):
+
+                    System.out.println("\nEdit/Close Ticket");
+                    System.out.println("COMING SOON");
+                    break;
+                case (2):
+
+                    System.out.println("\nRe-Open Ticket");
+                    System.out.println("COMING SOON");
+                    break;
+                case (3):
+
+                    System.out.println("\nLogging out and returning to Service Portal...");
+                    loggedUser = null;
+                    logout = true;
+                    break;
+            }
+
+        } while (logout == false);
+
+        return logout;
     }
 
 }
