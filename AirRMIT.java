@@ -16,6 +16,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class AirRMIT {
@@ -385,14 +387,18 @@ public class AirRMIT {
             showHeaderTwo("Staff Menu");
             System.out.println("[1] Open Ticket");
             System.out.println("[2] Log out");
+            System.out.print("Selection: ");
             staffSelection = validateUserSelection(2);
 
             switch (staffSelection) {
                 case (1):
-                    System.out.println("New Ticket Menu coming soon");
+
+                    openTicket();
                     break;
                 case (2):
-                    System.out.println("Logging out and returning to Service Portal");
+
+                    System.out.println("\nLogging out and returning to Service Portal...");
+                    loggedUser = null;
                     logout = true;
                     break;
             }
@@ -400,6 +406,61 @@ public class AirRMIT {
         } while (logout == false);
 
         return logout;
+    }
+
+    private void openTicket() {
+
+        showHeaderTwo("Open New Ticket");
+        System.out.println("**Fields cannot be blank**\n");
+
+        String description, severity;
+
+        do {
+
+            System.out.print("Description: ");
+            description = sc.nextLine();
+            if (description.isBlank()) {
+                System.out.println("Field cannot be left blank....");
+            }
+
+        } while (description.isBlank());
+
+        System.out.println("Severity ");
+        System.out.println("[1] Low");
+        System.out.println("[2] Medium");
+        System.out.println("[3] High");
+        int selection = validateUserSelection(3);
+
+        if (selection == 1) {
+
+            severity = "Low";
+        } else if (selection == 2) {
+
+            severity = "Medium";
+        } else {
+
+            severity = "High";
+        }
+
+        String openDateTime = getDateTime();
+
+        String allocatedStaff = getAllocatedStaff();
+
+    }
+
+    private String getAllocatedStaff() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllocatedStaff'");
+    }
+
+    private String getDateTime() {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
+
+        return now.format(formatter);
+
     }
 
     private boolean runTechMenu() {
