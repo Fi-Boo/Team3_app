@@ -315,14 +315,34 @@ public class AirRMIT {
 
         if (tList.size() == 0) {
 
-            System.out.println("No " + status + "Tickets...");
+            System.out.println("No " + status + " Tickets...");
 
         } else {
 
             for (Ticket ticket : tList) {
                 counter++;
-                System.out.println("Ticket #" + counter);
-                ticket.toString();
+
+                System.out.printf("\nTicket #%d", counter);
+                System.out.printf("\n%-16s: %s", "Open Date/Time", ticket.getOpenDateTime());
+                System.out.printf("\n%-16s: %s", "Severity", ticket.getSeverity());
+                System.out.printf("\n%-16s: %s", "Description", ticket.getDescription());
+
+                if (loggedUser.getStaffType().equalsIgnoreCase("s")) {
+
+                    System.out.printf("\n%-16s: %s\n", "Assigned To", ticket.getAssignedTo());
+
+                } else {
+
+                    System.out.printf("\n%-16s: %s\n", "Created By", ticket.getCreatedBy());
+
+                    if (!ticket.getStatus().substring(0, 1).equalsIgnoreCase("o")) {
+
+                        System.out.printf("\n%-16s: %s\n", "Closed Date/Time", ticket.getClosedDateTime());
+                    }
+                }
+
+                System.out.println("-".repeat(50));
+
             }
         }
     }
