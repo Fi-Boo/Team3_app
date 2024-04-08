@@ -77,7 +77,9 @@ public class AirRMIT {
 
                     break;
                 case (4):
+
                     System.out.println("Exiting System...");
+                    break;
 
             }
 
