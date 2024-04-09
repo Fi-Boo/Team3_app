@@ -51,8 +51,8 @@ public class Ticket {
         return this.createdBy;
     }
 
-    public void setAssignedTo(String email) {
-        this.assignedTo = email;
+    public void setAssignedTo(String assignedTo) {
+        this.assignedTo = assignedTo;
     }
 
     public String getAssignedTo() {
@@ -85,6 +85,28 @@ public class Ticket {
 
     public void setClosedDateTime(String closedDateTime) {
         this.closedDateTime = closedDateTime;
+    }
+
+    public void displayDetails(User loggedUser) {
+
+        System.out.printf("\n%-16s: %s", "Open Date/Time", this.openDateTime);
+        System.out.printf("\n%-16s: %s", "Severity", this.severity);
+        System.out.printf("\n%-16s: %s", "Description", this.description);
+
+        if (loggedUser.getStaffType().equalsIgnoreCase("s")) {
+
+            System.out.printf("\n%-16s: %s\n", "Assigned To", this.assignedTo);
+
+        } else {
+
+            System.out.printf("\n%-16s: %s\n", "Created By", this.createdBy);
+
+            if (!this.status.substring(0, 1).equalsIgnoreCase("o")) {
+                System.out.printf("%-16s: %s\n", "Status", this.status);
+                System.out.printf("%-16s: %s\n", "Closed By", loggedUser.getFullName());
+                System.out.printf("%-16s: %s\n", "Closed Date/Time", this.closedDateTime);
+            }
+        }
     }
 
     @Override

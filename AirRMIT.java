@@ -564,23 +564,7 @@ public class AirRMIT {
                 counter++;
 
                 System.out.printf("\nTicket #%d", counter);
-                System.out.printf("\n%-16s: %s", "Open Date/Time", ticket.getOpenDateTime());
-                System.out.printf("\n%-16s: %s", "Severity", ticket.getSeverity());
-                System.out.printf("\n%-16s: %s", "Description", ticket.getDescription());
-
-                if (loggedUser.getStaffType().equalsIgnoreCase("s")) {
-
-                    System.out.printf("\n%-16s: %s\n", "Assigned To", ticket.getAssignedTo());
-
-                } else {
-
-                    System.out.printf("\n%-16s: %s\n", "Created By", ticket.getCreatedBy());
-
-                    if (!ticket.getStatus().substring(0, 1).equalsIgnoreCase("o")) {
-
-                        System.out.printf("\n%-16s: %s\n", "Closed Date/Time", ticket.getClosedDateTime());
-                    }
-                }
+                ticket.displayDetails(loggedUser);
 
                 System.out.println("-".repeat(50));
 
@@ -674,7 +658,7 @@ public class AirRMIT {
         showHeaderTwo("Open New Ticket");
         System.out.println("**Fields cannot be blank**\n");
 
-        String description, severity;
+        String description, severity = "";
 
         do {
 
@@ -692,15 +676,16 @@ public class AirRMIT {
         System.out.println("[3] High");
         int selection = validateUserSelection(3);
 
-        if (selection == 1) {
-
-            severity = "Low";
-        } else if (selection == 2) {
-
-            severity = "Medium";
-        } else {
-
-            severity = "High";
+        switch (selection) {
+            case (1):
+                severity = "Low";
+                break;
+            case (2):
+                severity = "Medium";
+                break;
+            case (3):
+                severity = "High";
+                break;
         }
 
         String openDateTime = getDateTime();
@@ -796,14 +781,20 @@ public class AirRMIT {
 
             switch (staffSelection) {
                 case (1):
+                    if (getTicketsListByStatus("Open").size() > 0) {
+                        runEditCloseTickets();
+                    } else {
+                        System.out.println("\n*** No Tickets to edit ***");
+                    }
 
-                    System.out.println("\nEdit/Close Ticket");
-                    System.out.println("COMING SOON");
                     break;
                 case (2):
 
-                    System.out.println("\nRe-Open Ticket");
-                    System.out.println("COMING SOON");
+                    if (getTicketsListByStatus("Closed").size() > 0) {
+                        runReopenTickets();
+                    } else {
+                        System.out.println("\n*** No Closed Tickets to re-open ***");
+                    }
                     break;
                 case (3):
 
@@ -816,6 +807,119 @@ public class AirRMIT {
         } while (logout == false);
 
         return logout;
+    }
+
+    private void runReopenTickets() {
+
+        System.out.println("\nReopening feature coming soon\n");
+    }
+
+    /*
+     * function for edit and close ticket feature
+     * 
+     * Allows a tech user to edit the severity of a ticket. This may re-allocate the
+     * ticket to match severity to tech staff tier.
+     * Allows a tech to close a ticket
+     * 
+     */
+    private void runEditCloseTickets() {
+        showHeaderTwo("Edit/Close Ticket Menu");
+        showTickets("Open");
+        System.out.print("\nSelect Ticket to edit (Ticket#): ");
+
+        ArrayList<Ticket> list = getTicketsListByStatus("Open");
+        int selection = validateUserSelection(list.size());
+
+        System.out.println("\n= SELECTED TICKET DETAILS =\n");
+        Ticket ticket = list.get(selection - 1);
+
+        ticket.displayDetails(loggedUser);
+
+        System.out.println("\n= Options =");
+        System.out.println("[1] Edit Severity");
+        System.out.println("[2] Close Ticket");
+        System.out.println("[3] Return to Staff Menu");
+        System.out.print("Selection: ");
+        selection = validateUserSelection(3);
+
+        switch (selection) {
+            case (1):
+
+                System.out.println("\nSelect new severity rating");
+                System.out.println("[1] Low");
+                System.out.println("[2] Medium");
+                System.out.println("[3] High");
+                System.out.print("Selection: ");
+                int severitySelection = validateUserSelection(3);
+
+                String severity = null;
+
+                switch (severitySelection) {
+                    case (1):
+                        severity = "Low";
+                        break;
+                    case (2):
+                        severity = "Medium";
+                        break;
+                    case (3):
+                        severity = "High";
+                        break;
+                }
+
+                ticket.setSeverity(severity);
+
+                if (((severity.equals("Low") || severity.equals("Medium"))
+                        && loggedUser.getStaffType().equalsIgnoreCase("t2"))
+                        || (severity.equals("High") && loggedUser.getStaffType().equalsIgnoreCase("t1"))) {
+
+                    ticket.setAssignedTo(generateAssignedTech(severity));
+                }
+
+                System.out.println(
+                        "\nTicket severity changed. (Possible re-allocation if tech tier doesn't match severity)");
+                break;
+
+            case (2):
+
+                System.out.println("\nWas this ticket resolved?");
+                System.out.println("[1] Yes");
+                System.out.println("[2] No");
+                System.out.print("Selection: ");
+                int closingSelection = validateUserSelection(2);
+
+                if (closingSelection == 1) {
+                    ticket.setStatus("Closed [Resolved]");
+                } else {
+                    ticket.setStatus("Closed [Unresolved]");
+                }
+
+                ticket.setClosedDateTime(getDateTime());
+
+                break;
+
+            case (3):
+                System.out.println("Returning to Staff Menu...");
+                break;
+
+        }
+
+        updateTicketCollection(ticket);
+
+    }
+
+    private void updateTicketCollection(Ticket ticket) {
+
+        for (Ticket t : tickets) {
+            if (t.getCreatedBy().equals(ticket.getCreatedBy())
+                    && t.getOpenDateTime().equals(ticket.getOpenDateTime())) {
+                t.setSeverity(ticket.getSeverity());
+                t.setAssignedTo(ticket.getAssignedTo());
+                t.setStatus(ticket.getStatus());
+                t.setClosedDateTime(ticket.getClosedDateTime());
+            }
+        }
+
+        saveData();
     }
 
 }
