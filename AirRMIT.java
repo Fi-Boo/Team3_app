@@ -39,7 +39,7 @@ public class AirRMIT {
     Scanner sc = new Scanner(System.in);
 
     // for testing purposes I set at 5. Change to 20 for final submission
-    String passwordLength = "5";
+    String passwordLength = "20";
 
     public void run() {
 
