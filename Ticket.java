@@ -103,7 +103,6 @@ public class Ticket {
 
             if (!this.status.substring(0, 1).equalsIgnoreCase("o")) {
                 System.out.printf("%-16s: %s\n", "Status", this.status);
-                System.out.printf("%-16s: %s\n", "Closed By", loggedUser.getFullName());
                 System.out.printf("%-16s: %s\n", "Closed Date/Time", this.closedDateTime);
             }
         }

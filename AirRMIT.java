@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class AirRMIT {
                               // manipulation during testing
 
         loadData(); // used to load dummy data for testing.
+        runArchiveCheck(); // checks loaded data and archives tickets that have been closed for 24 or more
+                           // hours.
 
         int userInput;
 
@@ -288,6 +291,8 @@ public class AirRMIT {
             showHeaderOne("Staff Interface");
             System.out.println(loggedUser.getFullName());
             System.out.println("Clearance: [" + loggedUser.getStaffType().toUpperCase() + "]\n");
+
+            runArchiveCheck();
 
             showTickets("Open");
 
@@ -782,6 +787,7 @@ public class AirRMIT {
             switch (staffSelection) {
                 case (1):
                     if (getTicketsListByStatus("Open").size() > 0) {
+
                         runEditCloseTickets();
                     } else {
                         System.out.println("\n*** No Tickets to edit ***");
@@ -790,7 +796,10 @@ public class AirRMIT {
                     break;
                 case (2):
 
+                    runArchiveCheck();
+
                     if (getTicketsListByStatus("Closed").size() > 0) {
+
                         runReopenTickets();
                     } else {
                         System.out.println("\n*** No Closed Tickets to re-open ***");
@@ -809,9 +818,59 @@ public class AirRMIT {
         return logout;
     }
 
+    /*
+     * function to reopen a closed ticket
+     * 
+     */
     private void runReopenTickets() {
 
-        System.out.println("\nReopening feature coming soon\n");
+        showHeaderTwo("Re-Open Ticket Menu");
+        showTickets("Closed");
+        System.out.print("\nSelect Ticket to edit (Ticket#): ");
+
+        ArrayList<Ticket> list = getTicketsListByStatus("Closed");
+        int selection = validateUserSelection(list.size());
+
+        System.out.println("\n= SELECTED TICKET DETAILS =\n");
+        Ticket ticket = list.get(selection - 1);
+
+        ticket.displayDetails(loggedUser);
+
+        System.out.println("\n= Confirm Re-opening Ticket =");
+        System.out.println("[1] Yes");
+        System.out.println("[2] No");
+        System.out.print("Selection: ");
+        selection = validateUserSelection(2);
+
+        switch (selection) {
+            case (1):
+
+                ticket.setStatus("Open");
+                ticket.setClosedDateTime(null);
+
+                String assignedTech;
+
+                if ((ticket.getSeverity().equalsIgnoreCase("low") || ticket.getSeverity().equalsIgnoreCase("medium")
+                        && loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t"))
+                        || (ticket.getSeverity().equalsIgnoreCase("High")
+                                && loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("s"))) {
+
+                    assignedTech = generateAssignedTech(ticket.getSeverity());
+                } else {
+                    assignedTech = loggedUser.getFullName();
+                }
+
+                ticket.setAssignedTo(assignedTech);
+
+                updateTicketCollection(ticket);
+
+                System.out.println("\nTicket successfully re-opened... ");
+                break;
+            case (2):
+
+                System.out.println("\nProcess canceled. Returning to Tech Menu...");
+                break;
+        }
     }
 
     /*
@@ -823,6 +882,7 @@ public class AirRMIT {
      * 
      */
     private void runEditCloseTickets() {
+
         showHeaderTwo("Edit/Close Ticket Menu");
         showTickets("Open");
         System.out.print("\nSelect Ticket to edit (Ticket#): ");
@@ -907,6 +967,12 @@ public class AirRMIT {
 
     }
 
+    /*
+     * function to update the details of a ticket within the master tickets
+     * collection.
+     * 
+     * 
+     */
     private void updateTicketCollection(Ticket ticket) {
 
         for (Ticket t : tickets) {
@@ -920,6 +986,50 @@ public class AirRMIT {
         }
 
         saveData();
+    }
+
+    /*
+     * function that checks the tickets collection and changes the status of any
+     * ticket that has been closed for 24 or more hours to Archived.
+     * 
+     */
+    private void runArchiveCheck() {
+
+        for (Ticket ticket : tickets) {
+
+            if (ticket.getStatus().substring(0, 1).equalsIgnoreCase("c")) {
+
+                LocalDateTime closedDT = convertToDateTime(ticket.getClosedDateTime());
+
+                LocalDateTime currentTime = LocalDateTime.now();
+
+                Duration duration = Duration.between(closedDT, currentTime);
+
+                String statusSuffix = ticket.getStatus().substring(6, ticket.getStatus().length());
+
+                if (duration.toHours() >= 24) {
+
+                    ticket.setStatus("Archived" + statusSuffix);
+                }
+
+            }
+
+        }
+
+        saveData();
+
+    }
+
+    /*
+     * Utility function that converts a String in a particular date time format to a
+     * LocalDateTime variable.
+     * 
+     */
+    private LocalDateTime convertToDateTime(String closedDateTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
+
+        return LocalDateTime.parse(closedDateTime, formatter);
     }
 
 }
