@@ -137,8 +137,9 @@ public class AirRMIT {
                 + passwordLength + " characters. Please try again...";
         String password = validateRegex("Password: ", passwordRegex, passwordErrorMessage);
 
-        String nameRegex = "^[A-Z][a-z]*(?: [A-Z][a-z]*)+$";
-        String nameErrorMessage = "Full ame cannot be blank. Must begin with an Upper case letter and have a space between first name and surname. Please try again...";
+        // String nameRegexOld = "^[A-Z][a-z]*(?: [A-Z][a-z]*)+$";
+        String nameRegex = "^[A-Z][a-zA-Z]{1,}(?: [A-Z][a-z]{1,})*$";
+        String nameErrorMessage = "Full name cannot be blank. Must begin with an Upper case letter and have at least 2 letters. Please try again...";
         String fullName = validateRegex("Full Name: ", nameRegex, nameErrorMessage);
 
         String phoneRegex = "^(0)[1-9](?:[0-9]{8}|(?:\\s[0-9]{3,4}){3})$";
