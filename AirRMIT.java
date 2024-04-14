@@ -954,6 +954,14 @@ public class AirRMIT {
                     ticket.setStatus("Closed [Unresolved]");
                 }
 
+                System.out.print("\nTicket status changed to ");
+
+                if (closingSelection == 1) {
+                    System.out.println("Closed [Resolved]");
+                } else {
+                    System.out.println("Closed [Unresolved]");
+                }
+
                 ticket.setClosedDateTime(getDateTime());
 
                 break;
