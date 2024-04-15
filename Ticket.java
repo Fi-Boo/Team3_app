@@ -9,6 +9,10 @@
  * 
  */
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class Ticket {
 
     String description;
@@ -18,6 +22,7 @@ public class Ticket {
     String assignedTo;
     String openDateTime;
     String closedDateTime;
+    String closedBy;
 
     public Ticket(String description, String severity, String openDateTime, String createdBy) {
         super();
@@ -27,10 +32,11 @@ public class Ticket {
         this.status = "open";
         this.openDateTime = openDateTime;
         this.closedDateTime = null;
+        this.closedBy = null;
     }
 
     public Ticket(String description, String severity, String openDateTime, String createdBy, String assignedTo,
-            String status, String closedDateTime) {
+            String status, String closedDateTime, String closedBy) {
 
         super();
         this.description = description;
@@ -40,6 +46,7 @@ public class Ticket {
         this.status = status;
         this.openDateTime = openDateTime;
         this.closedDateTime = closedDateTime;
+        this.closedBy = closedBy;
 
     }
 
@@ -87,13 +94,25 @@ public class Ticket {
         this.closedDateTime = closedDateTime;
     }
 
+    public String getClosedBy() {
+        return closedBy;
+    }
+
+    public void setClosedBy(String closedBy) {
+        this.closedBy = closedBy;
+    }
+
     public void displayDetails(User loggedUser) {
 
         System.out.printf("\n%-16s: %s", "Open Date/Time", this.openDateTime);
         System.out.printf("\n%-16s: %s", "Severity", this.severity);
         System.out.printf("\n%-16s: %s", "Description", this.description);
 
-        if (loggedUser.getStaffType().equalsIgnoreCase("s")) {
+        if (loggedUser.getStaffType().equalsIgnoreCase("o")) {
+            System.out.printf("\n%-16s: %s", "Created By", this.createdBy);
+        }
+
+        if (!loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")) {
 
             System.out.printf("\n%-16s: %s\n", "Assigned To", this.assignedTo);
 
@@ -104,8 +123,47 @@ public class Ticket {
             if (!this.status.substring(0, 1).equalsIgnoreCase("o")) {
                 System.out.printf("%-16s: %s\n", "Status", this.status);
                 System.out.printf("%-16s: %s\n", "Closed Date/Time", this.closedDateTime);
+                System.out.printf("%-16s: %s\n", "Closed By", this.closedBy);
+
+                if (loggedUser.getStaffType().equalsIgnoreCase("o")) {
+                    System.out.printf("%-16s: %s\n", "Open Duration",
+                            calculateOpenDuration(this.openDateTime, this.closedDateTime));
+                }
             }
         }
+    }
+
+    private Object calculateOpenDuration(String openDateTime2, String closedDateTime2) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
+
+        LocalDateTime openDT = LocalDateTime.parse(openDateTime2, formatter);
+        LocalDateTime closedDT = LocalDateTime.parse(closedDateTime2, formatter);
+
+        Duration duration = Duration.between(openDT, closedDT);
+
+        long days = duration.toDays();
+        long hours = duration.toHours() % 24;
+        long minutes = duration.toMinutes() % 60;
+        long seconds = duration.getSeconds() % 60;
+
+        StringBuilder sb = new StringBuilder();
+
+        if (days > 0) {
+            sb.append(days + " days, ");
+        }
+        if (hours > 0) {
+            sb.append(hours + " hours, ");
+        }
+        if (minutes > 0) {
+            sb.append(minutes + " minutes, ");
+        }
+        if (seconds > 0) {
+            sb.append(seconds + " seconds.");
+        }
+
+        return sb.toString();
+
     }
 
     @Override
@@ -119,7 +177,8 @@ public class Ticket {
                 this.createdBy + separator +
                 this.assignedTo + separator +
                 this.status + separator +
-                this.closedDateTime + "\n";
+                this.closedDateTime + separator +
+                this.closedBy + "\n";
     }
 
 }

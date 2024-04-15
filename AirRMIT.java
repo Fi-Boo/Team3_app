@@ -295,7 +295,12 @@ public class AirRMIT {
 
             runArchiveCheck();
 
-            showTickets("Open");
+            // added condition to ensure open ticket only displays for tech and service
+            // staff menu
+            if (!loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("o")) {
+
+                showTickets("Open");
+            }
 
             if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")) {
 
@@ -307,9 +312,12 @@ public class AirRMIT {
 
                 logout = runStaffMenu();
 
-            } else {
+            } else if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")) {
 
                 logout = runTechMenu();
+            } else {
+
+                logout = runOwnerMenu(); // added owner menu option.
             }
 
         } while (logout != true);
@@ -477,6 +485,9 @@ public class AirRMIT {
         users.add(new User("nickd@airrmit.com", "Nick Drinkwater", "0433508178",
                 "iamnick"));
         users.add(new User("phib@airrmit.com", "Phi Bui", "0432008156", "iamphi"));
+        users.add(new User("owner@airrmit.com", "Owner Account", "0433333333", "iownthis", "o")); // added owner account
+                                                                                                  // to test additional
+                                                                                                  // client requirement
 
     }
 
@@ -501,7 +512,11 @@ public class AirRMIT {
 
                 String[] row = line.split("\t");
 
-                tickets.add(new Ticket(row[0], row[1], row[2], row[3], row[4], row[5], row[6]));
+                tickets.add(new Ticket(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])); // added row[7]
+                                                                                                         // to fulfill
+                                                                                                         // additional
+                                                                                                         // client
+                                                                                                         // requirement
 
             }
 
@@ -524,7 +539,15 @@ public class AirRMIT {
 
         StringBuilder content = new StringBuilder();
 
-        content.append("Description\tSeverity\tOpen Date/Time\tCreated By\tAssigned To\tStatus\tClosed Date/Time\n");
+        content.append(
+                "Description\tSeverity\tOpen Date/Time\tCreated By\tAssigned To\tStatus\tClosed Date/Time\tClosed By\n"); // added
+                                                                                                                          // 'closed
+                                                                                                                          // by'
+                                                                                                                          // to
+                                                                                                                          // fulfill
+                                                                                                                          // additional
+                                                                                                                          // client
+                                                                                                                          // requirement
 
         for (Ticket ticket : tickets) {
             content.append(ticket.toString());
@@ -592,7 +615,8 @@ public class AirRMIT {
 
         for (Ticket ticket : tickets) {
 
-            if (status.equalsIgnoreCase("open") && ticket.getStatus().equalsIgnoreCase(status)) {
+            if (status.equalsIgnoreCase("open") && ticket.getStatus().equalsIgnoreCase(status)
+                    && !loggedUser.getStaffType().equalsIgnoreCase("o")) {
 
                 if (loggedUser.getStaffType().equalsIgnoreCase("s")
                         && ticket.getCreatedBy().equals(loggedUser.getFullName())) {
@@ -604,6 +628,11 @@ public class AirRMIT {
 
                     list.add(ticket);
                 }
+            } else if (status.equalsIgnoreCase("open") && ticket.getStatus().equalsIgnoreCase(status)
+                    && loggedUser.getStaffType().equalsIgnoreCase("o")) {
+
+                list.add(ticket);
+
             } else if (!status.equalsIgnoreCase("open")
                     && ticket.getStatus().substring(0, 1).equalsIgnoreCase(status.substring(0, 1))) {
 
@@ -699,7 +728,8 @@ public class AirRMIT {
         String assignedTech = generateAssignedTech(severity);
 
         tickets.add(
-                new Ticket(description, severity, openDateTime, loggedUser.getFullName(), assignedTech, "Open", null));
+                new Ticket(description, severity, openDateTime, loggedUser.getFullName(), assignedTech, "Open", null,
+                        null));
 
         saveData();
 
@@ -848,6 +878,7 @@ public class AirRMIT {
 
                 ticket.setStatus("Open");
                 ticket.setClosedDateTime(null);
+                ticket.setClosedBy(null);
 
                 String assignedTech;
 
@@ -955,6 +986,7 @@ public class AirRMIT {
                 }
 
                 ticket.setClosedDateTime(getDateTime());
+                ticket.setClosedBy(loggedUser.getFullName());
 
                 break;
 
@@ -983,6 +1015,7 @@ public class AirRMIT {
                 t.setAssignedTo(ticket.getAssignedTo());
                 t.setStatus(ticket.getStatus());
                 t.setClosedDateTime(ticket.getClosedDateTime());
+                t.setClosedBy(ticket.getClosedBy());
             }
         }
 
@@ -1031,6 +1064,50 @@ public class AirRMIT {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
 
         return LocalDateTime.parse(closedDateTime, formatter);
+    }
+
+    // SPRINT 3 FEATURE - Owner Account
+
+    private boolean runOwnerMenu() {
+
+        int userSelection;
+        boolean logout = false;
+
+        do {
+
+            showHeaderTwo("Owner Menu");
+            System.out.println("= TICKET LOGS =");
+            System.out.println("[1] View ticket summary by start/end dates");
+            System.out.println("[2] View all open tickets");
+            System.out.println("[3] View all Closed/Archived tickets");
+            System.out.println("[4] Log out");
+            System.out.print("Selection: ");
+            userSelection = validateUserSelection(4);
+
+            switch (userSelection) {
+                case (1):
+
+                    System.out.println("1");
+                    break;
+                case (2):
+
+                    showTickets("Open");
+                    break;
+                case (3):
+
+                    showTickets("Closed");
+                    showTickets("Archived");
+                    break;
+                case (4):
+                    System.out.println("Logging out and returning to Service Portal");
+                    logout = true;
+                    break;
+            }
+
+        } while (userSelection != 4);
+
+        return logout;
+
     }
 
 }
