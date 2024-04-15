@@ -298,12 +298,7 @@ public class AirRMIT {
 
             runArchiveCheck();
 
-            // added condition to ensure open ticket only displays for tech and service
-            // staff menu
-            if (!loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("o")) {
-
-                showTickets("Open");
-            }
+            showTickets("Open");
 
             if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")) {
 
@@ -315,12 +310,9 @@ public class AirRMIT {
 
                 logout = runStaffMenu();
 
-            } else if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")) {
-
-                logout = runTechMenu();
             } else {
 
-                logout = runOwnerMenu(); // added owner menu option.
+                logout = runTechMenu();
             }
 
         } while (logout != true);
@@ -488,9 +480,6 @@ public class AirRMIT {
         users.add(new User("nickd@airrmit.com", "Nick Drinkwater", "0433508178",
                 "iamnick"));
         users.add(new User("phib@airrmit.com", "Phi Bui", "0432008156", "iamphi"));
-        users.add(new User("owner@airrmit.com", "Owner Account", "0433333333", "iownthis", "o")); // added owner account
-                                                                                                  // to test additional
-                                                                                                  // client requirement
 
     }
 
@@ -814,9 +803,11 @@ public class AirRMIT {
             showHeaderTwo("Technician Menu");
             System.out.println("[1] Edit/Close Ticket");
             System.out.println("[2] Re-open Ticket");
-            System.out.println("[3] Log out");
+            System.out.println("[3] Generate Summary by start/end date");
+            System.out.println("[4] Show All Closed/Archived Tickets");
+            System.out.println("[5] Log out");
             System.out.print("Selection: ");
-            staffSelection = validateUserSelection(3);
+            staffSelection = validateUserSelection(5);
 
             switch (staffSelection) {
                 case (1):
@@ -840,6 +831,17 @@ public class AirRMIT {
                     }
                     break;
                 case (3):
+
+                    runSummaryByDates();
+                    break;
+
+                case (4):
+
+                    showTickets("Closed");
+                    showTickets("Archived");
+                    break;
+
+                case (5):
 
                     System.out.println("\nLogging out and returning to Service Portal...");
                     loggedUser = null;
@@ -1070,56 +1072,6 @@ public class AirRMIT {
     }
 
     // SPRINT 3 FEATURE - Owner Account
-
-    /*
-     * runs owner account menu.
-     * 
-     * allows owner to get a summary based on start/end dates
-     * allows owner to view all open/closed tickets
-     * 
-     */
-    private boolean runOwnerMenu() {
-
-        int userSelection;
-        boolean logout = false;
-
-        do {
-
-            showHeaderTwo("Owner Menu");
-            System.out.println("= TICKET LOGS =");
-            System.out.println("[1] View ticket summary by start/end dates");
-            System.out.println("[2] View all open tickets");
-            System.out.println("[3] View all Closed/Archived tickets");
-            System.out.println("[4] Log out");
-            System.out.print("Selection: ");
-            userSelection = validateUserSelection(4);
-
-            switch (userSelection) {
-                case (1):
-
-                    runSummaryByDates();
-                    break;
-                case (2):
-
-                    showTickets("Open");
-                    break;
-                case (3):
-
-                    showTickets("Closed");
-                    showTickets("Archived");
-                    break;
-                case (4):
-                    System.out.println("Logging out and returning to Service Portal");
-                    logout = true;
-                    break;
-            }
-
-        } while (userSelection != 4);
-
-        return logout;
-
-    }
-
     /*
      * outputs a summary of open/closed tickets in a specific user input start/end
      * date.
@@ -1157,7 +1109,7 @@ public class AirRMIT {
 
         do {
 
-            System.out.println("\n== Ticket summary ==\n");
+            showHeaderTwo("== Ticket Summary ==");
             System.out.printf("%-20s: %d\n", "Total Tickets", selectedTickets.size());
             System.out.println("-".repeat(50));
             System.out.printf("%-20s: %d\n", "Still Open",
@@ -1173,29 +1125,57 @@ public class AirRMIT {
 
             switch (ticketSelect) {
                 case (1):
-                    System.out.println("\n== Open Tickets ==");
-                    for (Ticket ticket : selectedTickets) {
-                        if (ticket.getStatus().equalsIgnoreCase("Open")) {
-                            ticket.displayDetails(loggedUser);
-                            System.out.println("-".repeat(50));
+
+                    showHeaderTwo("== Open ==");
+
+                    if ((selectedTickets.size() - (closedResolved.size() + closedUnresolved.size())) > 0) {
+
+                        for (Ticket ticket : selectedTickets) {
+                            if (ticket.getStatus().equalsIgnoreCase("Open")) {
+                                ticket.displayDetails(loggedUser);
+                                System.out.println("-".repeat(50));
+                            }
                         }
+                    } else {
+
+                        System.out.println("\nNo tickets to show.\n");
                     }
                     break;
 
                 case (2):
-                    System.out.println("\n== Closed & Resolved ==");
-                    for (Ticket ticket : closedResolved) {
-                        ticket.displayDetails(loggedUser);
-                        System.out.println("-".repeat(50));
 
+                    showHeaderTwo("== Closed & Resolved ==");
+
+                    if (closedResolved.size() > 0) {
+
+                        for (Ticket ticket : closedResolved) {
+                            ticket.displayDetails(loggedUser);
+                            System.out.println("-".repeat(50));
+
+                        }
+
+                    } else {
+
+                        System.out.println("\nNo tickets to show.\n");
                     }
+
                     break;
                 case (3):
-                    System.out.println("\n== Closed & Unresolved ==");
-                    for (Ticket ticket : closedUnresolved) {
-                        ticket.displayDetails(loggedUser);
-                        System.out.println("-".repeat(50));
+
+                    showHeaderTwo("== Closed & Unresolved ==");
+
+                    if (closedUnresolved.size() > 0) {
+
+                        for (Ticket ticket : closedUnresolved) {
+                            ticket.displayDetails(loggedUser);
+                            System.out.println("-".repeat(50));
+                        }
+
+                    } else {
+
+                        System.out.println("\nNo tickets to show.\n");
                     }
+
                     break;
                 case (4):
                     System.out.println("\nExiting Summary and returning to staff menu...\n");

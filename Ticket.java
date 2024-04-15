@@ -120,11 +120,9 @@ public class Ticket {
                 System.out.printf("%-16s: %s\n", "Status", this.status);
                 System.out.printf("%-16s: %s\n", "Closed Date/Time", this.closedDateTime);
                 System.out.printf("%-16s: %s\n", "Closed By", this.closedBy);
+                System.out.printf("%-16s: %s\n", "Open Duration",
+                        calculateOpenDuration(this.openDateTime, this.closedDateTime));
 
-                if (loggedUser.getStaffType().equalsIgnoreCase("o")) {
-                    System.out.printf("%-16s: %s\n", "Open Duration",
-                            calculateOpenDuration(this.openDateTime, this.closedDateTime));
-                }
             }
         }
     }

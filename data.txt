@@ -1,5 +1,5 @@
 Description	Severity	Open Date/Time	Created By	Assigned To	Status	Closed Date/Time	Closed By
-low level ticket	Low	11/04/24 10:40:24	Phi Bui	Harry Styles	Closed [Unresolved]	15/04/24 10:41:46	Harry Styles
+low level ticket	Low	11/04/24 10:40:24	Phi Bui	Zayne Malik	Open	null	null
 medium level ticket	Medium	12/04/24 10:40:29	Phi Bui	Niall Horan	Open	null	null
 high level ticket	High	15/04/24 10:40:34	Phi Bui	Louis Tomlinson	Open	null	null
 another low level ticket1	Low	15/04/24 10:40:40	Phi Bui	Liam Payne	Open	null	null
@@ -8,3 +8,6 @@ another high level ticket 	High	13/04/24 10:40:53	Phi Bui	Zayne Malik	Open	null	
 high stuff	High	15/04/24 10:41:09	Belrose Gunzel	Louis Tomlinson	Open	null	null
 medium tickets smell	Medium	08/04/24 10:41:16	Belrose Gunzel	Niall Horan	Closed [Resolved]	15/04/24 10:42:35	Niall Horan
 this is definitely a loww priority with 2ww	Low	06/04/24 10:41:25	Belrose Gunzel	Liam Payne	Open	null	null
+low lvl	Low	16/04/24 09:19:48	Phi Bui	Harry Styles	Closed [Unresolved]	16/04/24 09:20:41	Harry Styles
+more low lvls	Low	16/04/24 09:19:55	Phi Bui	Harry Styles	Open	null	null
+high lvl	High	16/04/24 09:20:01	Phi Bui	Louis Tomlinson	Open	null	null
