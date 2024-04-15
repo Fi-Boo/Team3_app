@@ -16,9 +16,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -1068,6 +1071,13 @@ public class AirRMIT {
 
     // SPRINT 3 FEATURE - Owner Account
 
+    /*
+     * runs owner account menu.
+     * 
+     * allows owner to get a summary based on start/end dates
+     * allows owner to view all open/closed tickets
+     * 
+     */
     private boolean runOwnerMenu() {
 
         int userSelection;
@@ -1087,7 +1097,7 @@ public class AirRMIT {
             switch (userSelection) {
                 case (1):
 
-                    System.out.println("1");
+                    runSummaryByDates();
                     break;
                 case (2):
 
@@ -1107,6 +1117,209 @@ public class AirRMIT {
         } while (userSelection != 4);
 
         return logout;
+
+    }
+
+    /*
+     * outputs a summary of open/closed tickets in a specific user input start/end
+     * date.
+     * allows user to see ticket details for chosen date range
+     * 
+     */
+    private void runSummaryByDates() {
+
+        showHeaderTwo("Summary by Dates");
+        System.out.print("Input start date (dd/mm/yy): ");
+        String startDate = getValidDate();
+        String endDate;
+
+        boolean validDates = false;
+
+        do {
+            System.out.print("Input end date (dd/mm/yy): ");
+            endDate = getValidDate();
+
+            if (calculateDaysDiff(startDate, endDate) < 0) {
+                System.out.println("End date cannot be before start date. Try again...");
+            } else {
+                validDates = true;
+            }
+
+        } while (validDates == false);
+
+        ArrayList<Ticket> selectedTickets = getTicketsByDates(startDate, endDate);
+        ArrayList<Ticket> closedResolved = getTotalByStatus(selectedTickets, "resolved");
+        ArrayList<Ticket> closedUnresolved = getTotalByStatus(selectedTickets, "unresolved");
+
+        System.out.println(selectedTickets.size());
+
+        boolean exit = false;
+
+        do {
+
+            System.out.println("\n== Ticket summary ==\n");
+            System.out.printf("%-20s: %d\n", "Total Tickets", selectedTickets.size());
+            System.out.println("-".repeat(50));
+            System.out.printf("%-20s: %d\n", "Still Open",
+                    (selectedTickets.size() - (closedResolved.size() + closedUnresolved.size())));
+            System.out.printf("%-20s: %d\n", "Closed [Resolved]", closedResolved.size());
+            System.out.printf("%-20s: %d\n", "Closed [Unresolved]", closedUnresolved.size());
+            System.err.println("\n[1] View Opened Tickets");
+            System.out.println("[2] View Closed & Resolved Tickets");
+            System.out.println("[3] View Closed & Unresolved Tickets");
+            System.out.println("[4] Return to staff menu");
+            System.out.print("Selection: ");
+            int ticketSelect = validateUserSelection(4);
+
+            switch (ticketSelect) {
+                case (1):
+                    System.out.println("\n== Open Tickets ==");
+                    for (Ticket ticket : selectedTickets) {
+                        if (ticket.getStatus().equalsIgnoreCase("Open")) {
+                            ticket.displayDetails(loggedUser);
+                            System.out.println("-".repeat(50));
+                        }
+                    }
+                    break;
+
+                case (2):
+                    System.out.println("\n== Closed & Resolved ==");
+                    for (Ticket ticket : closedResolved) {
+                        ticket.displayDetails(loggedUser);
+                        System.out.println("-".repeat(50));
+
+                    }
+                    break;
+                case (3):
+                    System.out.println("\n== Closed & Unresolved ==");
+                    for (Ticket ticket : closedUnresolved) {
+                        ticket.displayDetails(loggedUser);
+                        System.out.println("-".repeat(50));
+                    }
+                    break;
+                case (4):
+                    System.out.println("\nExiting Summary and returning to staff menu...\n");
+                    exit = true;
+            }
+
+        } while (exit == false);
+    }
+
+    /*
+     * Finds and returns and collection of tickets based on unresolved or resolved
+     * parameter.
+     * 
+     */
+    private ArrayList<Ticket> getTotalByStatus(ArrayList<Ticket> selectedTickets, String string) {
+
+        ArrayList<Ticket> list = new ArrayList<Ticket>();
+
+        for (Ticket t : selectedTickets) {
+            if ((t.getStatus().substring(0, 1).equalsIgnoreCase("c")
+                    && t.getStatus().substring(8, 9).equalsIgnoreCase(string.substring(0, 1)))
+                    || (t.getStatus().substring(0, 1).equalsIgnoreCase("a")
+                            && t.getStatus().substring(10, 11).equalsIgnoreCase(string.substring(0, 1)))) {
+
+                list.add(t);
+            }
+        }
+        return list;
+    }
+
+    /*
+     * Finds and returns a collection of tickets based on a user input date range.
+     * 
+     */
+    private ArrayList<Ticket> getTicketsByDates(String startDate, String endDate) {
+
+        ArrayList<Ticket> list = new ArrayList<Ticket>();
+
+        for (Ticket t : tickets) {
+            if (checkForDateAfter(startDate, t.getOpenDateTime().substring(0, 8))
+                    && checkForDateBefore(t.getOpenDateTime().substring(0, 8), endDate)) {
+                list.add(t);
+            }
+        }
+
+        return list;
+    }
+
+    /*
+     * Utility function to check if a tickets date is before a user input date.
+     * Returns a boolean value.
+     */
+    private boolean checkForDateBefore(String substring, String endDate) {
+
+        long daysDiff = calculateDaysDiff(substring, endDate);
+        if (daysDiff >= 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+     * Utility function to check if a tickets date is after a user input date.
+     * Returns a boolean value.
+     */
+    private boolean checkForDateAfter(String startDate, String openDateTime) {
+
+        long daysDiff = calculateDaysDiff(startDate, openDateTime);
+        if (daysDiff >= 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+     * Utility function to calculate and return the number of days difference in two
+     * dates
+     * 
+     */
+    private long calculateDaysDiff(String startDate, String endDate) {
+
+        LocalDate start = convertToDate(startDate);
+        LocalDate end = convertToDate(endDate);
+
+        return ChronoUnit.DAYS.between(start, end);
+    }
+
+    /*
+     * Utility function that validates user input to specific date format dd/mm/yy
+     */
+    private String getValidDate() {
+        String input = null;
+        boolean validDate = false;
+
+        do {
+
+            try {
+
+                input = sc.nextLine();
+
+                LocalDate date = convertToDate(input);
+                validDate = true;
+
+            } catch (DateTimeException e) {
+
+                System.out.println("Invalid format detected. Please use format dd/MM/yy");
+                System.out.print("Date: ");
+            }
+
+        } while (validDate == false);
+
+        return input;
+    }
+
+    /*
+     * Utility function to convert a user input String to date format dd/MM/yy
+     */
+    private LocalDate convertToDate(String input) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
+
+        return LocalDate.parse(input, formatter);
 
     }
 

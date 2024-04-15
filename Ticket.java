@@ -108,11 +108,7 @@ public class Ticket {
         System.out.printf("\n%-16s: %s", "Severity", this.severity);
         System.out.printf("\n%-16s: %s", "Description", this.description);
 
-        if (loggedUser.getStaffType().equalsIgnoreCase("o")) {
-            System.out.printf("\n%-16s: %s", "Created By", this.createdBy);
-        }
-
-        if (!loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("t")) {
+        if (loggedUser.getStaffType().substring(0, 1).equalsIgnoreCase("s")) {
 
             System.out.printf("\n%-16s: %s\n", "Assigned To", this.assignedTo);
 
