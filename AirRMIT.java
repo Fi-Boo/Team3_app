@@ -49,7 +49,6 @@ public class AirRMIT {
         loadHardCodedUsers(); // hardcoded staff data. May change to loading from a csv for easy data
                               // manipulation during testing
 
-        loadData(); // used to load dummy data for testing.
         runArchiveCheck(); // checks loaded data and archives tickets that have been closed for 24 or more
                            // hours.
 
@@ -122,14 +121,14 @@ public class AirRMIT {
 
             String emailRegex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
                     + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-            String emailErrorMessage = "Invalid email format. Please try again...";
+            String emailErrorMessage = "Invalid email format. Must be in the format (name@domain.com). Please try again...";
             email = validateRegex("Email: ", emailRegex, emailErrorMessage);
 
             emailExists = checkEmail(email);
 
             if (emailExists == true) {
 
-                System.out.println("There is an account already associated with this email. Try again buddy...");
+                System.out.println("There is an account already associated with this email...");
 
             }
 
@@ -189,7 +188,7 @@ public class AirRMIT {
 
                 loginAttempts--;
 
-                System.out.printf("\nInvalid login. %d attempts remaining...\n", loginAttempts);
+                System.out.printf("\nInvalid email or password. %d attempts remaining...\n", loginAttempts);
 
                 if (loginAttempts == 0) {
 
@@ -486,81 +485,6 @@ public class AirRMIT {
     // SPRINT 2 ADDITIONS
 
     /*
-     * function to load data from hardcoded data.txt
-     * 
-     * Assumption - data in each datafield is correct.
-     * - no data validation implemented (out of scope)
-     * 
-     */
-    private void loadData() {
-
-        try {
-
-            BufferedReader br = new BufferedReader(new FileReader("data.txt"));
-
-            String line = br.readLine();
-
-            while ((line = br.readLine()) != null) {
-
-                String[] row = line.split("\t");
-
-                tickets.add(new Ticket(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])); // added row[7]
-                                                                                                         // to fulfill
-                                                                                                         // additional
-                                                                                                         // client
-                                                                                                         // requirement
-
-            }
-
-            br.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("data load successful...");
-
-    }
-
-    /*
-     * function to save Ticket data to file data.txt
-     * used for testing purposes
-     * 
-     */
-    public void saveData() {
-
-        StringBuilder content = new StringBuilder();
-
-        content.append(
-                "Description\tSeverity\tOpen Date/Time\tCreated By\tAssigned To\tStatus\tClosed Date/Time\tClosed By\n"); // added
-                                                                                                                          // 'closed
-                                                                                                                          // by'
-                                                                                                                          // to
-                                                                                                                          // fulfill
-                                                                                                                          // additional
-                                                                                                                          // client
-                                                                                                                          // requirement
-
-        for (Ticket ticket : tickets) {
-            content.append(ticket.toString());
-        }
-
-        FileWriter filewriter = null;
-
-        try {
-
-            filewriter = new FileWriter("data.txt", false);
-            filewriter.write(content.toString());
-
-            filewriter.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /*
      * outputs ticket data in a particular format based on certain conditions.
      * 
      * conditions - If Staff logged in, shows only staff member's open ticket
@@ -722,8 +646,6 @@ public class AirRMIT {
         tickets.add(
                 new Ticket(description, severity, openDateTime, loggedUser.getFullName(), assignedTech, "Open", null,
                         null));
-
-        saveData();
 
         System.out.println("\nNew Ticket opened and assigned...\n");
 
@@ -1023,8 +945,6 @@ public class AirRMIT {
                 t.setClosedBy(ticket.getClosedBy());
             }
         }
-
-        saveData();
     }
 
     /*
@@ -1050,13 +970,8 @@ public class AirRMIT {
 
                     ticket.setStatus("Archived" + statusSuffix);
                 }
-
             }
-
         }
-
-        saveData();
-
     }
 
     /*
@@ -1071,7 +986,7 @@ public class AirRMIT {
         return LocalDateTime.parse(closedDateTime, formatter);
     }
 
-    // SPRINT 3 FEATURE - Owner Account
+    // SPRINT 3 FEATURE - Summary Feature
     /*
      * outputs a summary of open/closed tickets in a specific user input start/end
      * date.
